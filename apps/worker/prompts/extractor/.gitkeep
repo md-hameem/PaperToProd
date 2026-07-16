@@ -1,0 +1,2 @@
+# Prompt templates — versioned per agent (agent_name/vN)
+# Each template: Role framing → Task-specific context → Output schema → Self-check instruction

@@ -1,0 +1,2 @@
+# Helm charts — one per service
+# Parameterized for dev/staging/prod via values-{env}.yaml overlays

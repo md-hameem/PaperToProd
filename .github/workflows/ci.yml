@@ -1,0 +1,60 @@
+# GitHub Actions CI/CD Pipeline
+# Doc 11 §5 / Doc 15
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install ruff mypy
+
+      - name: Lint (Ruff)
+        run: |
+          ruff check apps/ packages/
+
+      - name: Typecheck (mypy)
+        run: |
+          mypy apps/api/app/ --ignore-missing-imports
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install API dependencies
+        run: |
+          pip install -r apps/api/requirements.txt
+
+      - name: Run API tests
+        run: |
+          cd apps/api && pytest tests/ -v
+
+  # TODO: Build container images step
+  # TODO: Integration test step
+  # TODO: Golden Dataset regression gate (on agent/prompt changes)
+  # TODO: Deploy to staging (on merge to main)
+  # TODO: Deploy to production (manual approval)
