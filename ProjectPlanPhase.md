@@ -1,6 +1,7 @@
 # PaperToProd — Project Phase Plan & Tracker
 
 **Created:** 2026-07-16  
+**Last Updated:** 2026-07-17  
 **Source:** Docs 01–16 (Executive Vision through Engineering Roadmap)  
 **Legend:** `[ ]` Not started · `[/]` In progress · `[x]` Completed
 
@@ -11,35 +12,35 @@
 > **Goal:** Establish the monorepo, tooling, design system, and development environment before any feature work begins.
 
 ### 0.1 — Repository & Monorepo Structure
-- [ ] Initialize Git repository
-- [ ] Create monorepo directory layout per Doc 09 §13:
-  - [ ] `/apps/api` — FastAPI monolith
-  - [ ] `/apps/worker` — Celery + LangGraph orchestration
-  - [ ] `/apps/sandbox-svc` — Isolated execution service
-  - [ ] `/apps/web` — Next.js frontend
-  - [ ] `/packages/shared-schemas` — Shared Pydantic models (JobState, etc.)
-  - [ ] `/infra` — Terraform/Helm configurations
-  - [ ] `/docs` — Existing documentation (Docs 01–16)
+- [x] Initialize Git repository
+- [x] Create monorepo directory layout per Doc 09 §13:
+  - [x] `/apps/api` — FastAPI monolith
+  - [x] `/apps/worker` — Celery + LangGraph orchestration
+  - [x] `/apps/sandbox-svc` — Isolated execution service
+  - [x] `/apps/web` — Next.js frontend (placeholder, to be initialized with Next.js in 0.4)
+  - [x] `/packages/shared-schemas` — Shared Pydantic models (JobState, etc.)
+  - [x] `/infra` — Terraform/Helm configurations
+  - [x] `/docs` — Existing documentation (Docs 01–16)
 - [ ] Configure linting & formatting (Ruff/Black for Python, ESLint/Prettier for JS/TS)
 - [ ] Configure type checking (mypy for Python, TypeScript strict mode for frontend)
 - [ ] Set up pre-commit hooks
 
 ### 0.2 — Development Environment
-- [ ] Create `docker-compose.dev.yml` mirroring production service topology:
-  - [ ] FastAPI API service
-  - [ ] Celery worker service
-  - [ ] Sandbox execution service (stub)
-  - [ ] PostgreSQL
-  - [ ] Redis
-  - [ ] Qdrant (vector store)
-  - [ ] MinIO (S3-compatible object store)
-- [ ] Create `.env.example` with all required environment variables
-- [ ] Write a `CONTRIBUTING.md` with setup instructions
+- [x] Create `docker-compose.dev.yml` mirroring production service topology:
+  - [x] FastAPI API service
+  - [x] Celery worker service
+  - [x] Sandbox execution service (stub)
+  - [x] PostgreSQL
+  - [x] Redis
+  - [x] Qdrant (vector store)
+  - [x] MinIO (S3-compatible object store)
+- [x] Create `.env.example` with all required environment variables
+- [x] Write a `CONTRIBUTING.md` with setup instructions
 
 ### 0.3 — CI/CD Pipeline (basic, per Doc 11 §5 / Doc 15)
-- [ ] Set up GitHub Actions workflow:
-  - [ ] Lint & typecheck step
-  - [ ] Unit test step
+- [x] Set up GitHub Actions workflow:
+  - [x] Lint & typecheck step
+  - [x] Unit test step
   - [ ] Build container images step
   - [ ] Integration test step (placeholder)
 - [ ] Configure Docker image registry (ECR or GitHub Container Registry)
