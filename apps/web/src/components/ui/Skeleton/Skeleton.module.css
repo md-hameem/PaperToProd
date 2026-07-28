@@ -1,0 +1,30 @@
+.skeleton {
+  display: block;
+}
+
+.text {
+  height: 14px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.rect {
+  width: 100%;
+  height: 120px;
+  border-radius: var(--radius-lg);
+}
+
+.inline {
+  display: inline-block;
+  height: 14px;
+  width: 80px;
+  border-radius: var(--radius-sm);
+  vertical-align: middle;
+}

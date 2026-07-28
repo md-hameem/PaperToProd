@@ -1,0 +1,100 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.sm {
+  height: 22px;
+  padding: 0 var(--space-2);
+  font-size: 11px;
+}
+
+.md {
+  height: 28px;
+  padding: 0 var(--space-3);
+  font-size: var(--type-caption-size);
+}
+
+/* ── Status colors ────────────────────────────────────── */
+
+.status-queued {
+  background-color: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.status-running {
+  background-color: rgba(96, 165, 250, 0.12);
+  color: var(--color-status-info);
+}
+
+.status-complete {
+  background-color: rgba(52, 211, 153, 0.12);
+  color: var(--color-status-success);
+}
+
+.status-partial {
+  background-color: rgba(251, 191, 36, 0.12);
+  color: var(--color-status-warning);
+}
+
+.status-failed {
+  background-color: rgba(248, 113, 113, 0.12);
+  color: var(--color-status-error);
+}
+
+.status-cancelled {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-tertiary);
+}
+
+/* ── Agent accent colors ──────────────────────────────── */
+
+.agent-extractor {
+  background-color: rgba(129, 140, 248, 0.12);
+  color: var(--color-agent-extractor);
+}
+
+.agent-finder {
+  background-color: rgba(52, 211, 153, 0.12);
+  color: var(--color-agent-finder);
+}
+
+.agent-scaffolder {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: var(--color-agent-scaffolder);
+}
+
+.agent-devops {
+  background-color: rgba(96, 165, 250, 0.12);
+  color: var(--color-agent-devops);
+}
+
+.agent-reviewer {
+  background-color: rgba(244, 114, 182, 0.12);
+  color: var(--color-agent-reviewer);
+}
+
+.agent-docgen {
+  background-color: rgba(167, 139, 250, 0.12);
+  color: var(--color-agent-docgen);
+}
+
+/* ── Pulse animation for running state ────────────────── */
+
+.pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background-color: currentColor;
+  animation: pulse-anim 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-anim {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}

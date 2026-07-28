@@ -1,7 +1,7 @@
 # PaperToProd — Project Phase Plan & Tracker
 
 **Created:** 2026-07-16  
-**Last Updated:** 2026-07-17  
+**Last Updated:** 2026-07-18  
 **Source:** Docs 01–16 (Executive Vision through Engineering Roadmap)  
 **Legend:** `[ ]` Not started · `[/]` In progress · `[x]` Completed
 
@@ -21,9 +21,9 @@
   - [x] `/packages/shared-schemas` — Shared Pydantic models (JobState, etc.)
   - [x] `/infra` — Terraform/Helm configurations
   - [x] `/docs` — Existing documentation (Docs 01–16)
-- [ ] Configure linting & formatting (Ruff/Black for Python, ESLint/Prettier for JS/TS)
-- [ ] Configure type checking (mypy for Python, TypeScript strict mode for frontend)
-- [ ] Set up pre-commit hooks
+- [x] Configure linting & formatting (Ruff for Python, ESLint for JS/TS — pyproject.toml + .pre-commit-config.yaml)
+- [x] Configure type checking (mypy via pyproject.toml, TypeScript strict via Next.js)
+- [x] Set up pre-commit hooks (Ruff lint/format, mypy, trailing whitespace, secrets detection)
 
 ### 0.2 — Development Environment
 - [x] Create `docker-compose.dev.yml` mirroring production service topology:
@@ -46,41 +46,41 @@
 - [ ] Configure Docker image registry (ECR or GitHub Container Registry)
 
 ### 0.4 — Design System Foundation (Doc 07)
-- [ ] Set up Next.js frontend app with TypeScript
-- [ ] Install & configure core dependencies:
-  - [ ] Framer Motion (component + pipeline animation)
-  - [ ] Lucide React (icon set)
-  - [ ] Inter font (UI typeface)
-  - [ ] JetBrains Mono font (code/terminal typeface)
-- [ ] Implement CSS custom properties / design tokens:
-  - [ ] Color palette tokens (dark & light mode) — neutrals, accent `#7C6CF0`, status colors
-  - [ ] Typography scale tokens (`type/display` through `type/mono`)
-  - [ ] Spacing scale tokens (4px base unit progression)
-  - [ ] Elevation / shadow tokens (3-tier system)
-  - [ ] Corner radius tokens (`radius/sm` through `radius/full`)
-  - [ ] Animation/motion tokens (duration + spring configs)
-  - [ ] Breakpoint tokens (480 / 768 / 1024 / 1280px)
-- [ ] Implement dark/light mode toggle with `prefers-color-scheme` detection
-- [ ] Implement `prefers-reduced-motion` support globally
+- [x] Set up Next.js frontend app with TypeScript
+- [x] Install & configure core dependencies:
+  - [x] Framer Motion (component + pipeline animation)
+  - [x] Lucide React (icon set)
+  - [x] Inter font (UI typeface — via Google Fonts import)
+  - [x] JetBrains Mono font (code/terminal typeface — via Google Fonts import)
+- [x] Implement CSS custom properties / design tokens (`src/styles/tokens.css`):
+  - [x] Color palette tokens (dark & light mode) — neutrals, accent `#7C6CF0`, status colors
+  - [x] Typography scale tokens (`type/display` through `type/mono`)
+  - [x] Spacing scale tokens (4px base unit progression)
+  - [x] Elevation / shadow tokens (3-tier system)
+  - [x] Corner radius tokens (`radius/sm` through `radius/full`)
+  - [x] Animation/motion tokens (duration + spring configs) + Framer Motion presets (`src/lib/motion.ts`)
+  - [x] Breakpoint tokens (480 / 768 / 1024 / 1280px)
+- [x] Implement dark/light mode toggle with `prefers-color-scheme` detection (`src/providers/theme-provider.tsx`)
+- [x] Implement `prefers-reduced-motion` support globally
 
 ### 0.5 — Shared Component Library (Doc 06 §Cross-Page + Doc 07 §10)
-- [ ] Build core components with 4-state contract (loading/empty/error/success):
-  - [ ] `Button` — primary / secondary / ghost / destructive variants × 5 states
-  - [ ] `TextInput` — with validation states, focus ring animation
+- [/] Build core components with 4-state contract (loading/empty/error/success):
+  - [x] `Button` — primary / secondary / ghost / destructive variants × loading + icon states
+  - [x] `TextInput` — with validation states, focus ring animation
   - [ ] `Select` — dropdown with proper keyboard navigation
-  - [ ] `Toggle` — with `spring.snappy` thumb animation (Doc 05 §5)
+  - [x] `Toggle` — with `spring.snappy` thumb animation (Doc 05 §5)
   - [ ] `Checkbox`
-  - [ ] `Card` — with hover elevation effect (Doc 05 §6)
-  - [ ] `Modal` — glassmorphism overlay (backdrop-blur 20px, Doc 05 §11)
+  - [x] `Card` — with hover elevation effect (Doc 05 §6)
+  - [x] `Modal` — glassmorphism overlay (backdrop-blur 20px, Doc 05 §11)
   - [ ] `Toast` — for async/background events only
   - [ ] `Tabs`
   - [ ] `Table` + `TableRow` — with hover quick-action reveal
-  - [ ] `StatusChip` — mapped to `color/status/*` and `color/agent/*`
+  - [x] `StatusChip` — mapped to `color/status/*` and `color/agent/*`
   - [ ] `Avatar`
-  - [ ] `ProgressRing`
+  - [x] `ProgressRing` — animated SVG with fidelity-score color gradient
   - [ ] `ProgressBar`
   - [ ] `CodeBlock` — with syntax highlighting
-  - [ ] `Skeleton` — shape-matched variants per component (Doc 05 §18)
+  - [x] `Skeleton` — shape-matched variants (text, circle, rect, inline)
   - [ ] `EmptyState` — monochrome line-art illustration + actionable CTA
 - [ ] Build layout components:
   - [ ] `Sidebar` — 240px expanded / 64px collapsed, responsive bottom-sheet on mobile

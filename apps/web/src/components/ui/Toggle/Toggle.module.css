@@ -1,0 +1,45 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.wrapper.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.track {
+  width: 44px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: none;
+  background-color: var(--color-bg-tertiary);
+  padding: 2px;
+  cursor: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.track.checked {
+  background-color: var(--color-accent);
+  justify-content: flex-end;
+}
+
+.thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background-color: white;
+  box-shadow: var(--shadow-sm);
+  display: block;
+}
+
+.label {
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-secondary);
+  user-select: none;
+}

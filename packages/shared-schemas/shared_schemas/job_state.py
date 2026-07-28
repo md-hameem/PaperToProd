@@ -7,13 +7,13 @@ defined slices of this state. LangGraph persists it at each node transition.
 See Doc 08 §2 for the full specification.
 """
 
-from pydantic import BaseModel, Field
-from enum import Enum
-from typing import Optional
 from datetime import datetime
+from enum import StrEnum
+
+from pydantic import BaseModel, Field
 
 
-class JobStatus(str, Enum):
+class JobStatus(StrEnum):
     QUEUED = "queued"
     RUNNING = "running"
     AWAITING_APPROVAL = "awaiting_approval"
@@ -23,21 +23,22 @@ class JobStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class DomainClassification(str, Enum):
+class DomainClassification(StrEnum):
     CV = "cv"
     NLP = "nlp"
     RL = "rl"
     OTHER = "other"
 
 
-class ConfidenceLevel(str, Enum):
-    HIGH = "high"        # Explicitly stated in paper
-    MEDIUM = "medium"    # Inferred from citation/prior work
-    LOW = "low"          # Defaulted from general convention
+class ConfidenceLevel(StrEnum):
+    HIGH = "high"  # Explicitly stated in paper
+    MEDIUM = "medium"  # Inferred from citation/prior work
+    LOW = "low"  # Defaulted from general convention
 
 
 class MethodologyComponent(BaseModel):
     """A single extracted methodology component with traceability."""
+
     name: str
     description: str
     source_ref: str  # Section/page/equation number in the paper
@@ -47,35 +48,39 @@ class MethodologyComponent(BaseModel):
 
 class MethodologyGap(BaseModel):
     """A flagged ambiguity or missing detail from the paper."""
+
     description: str
-    proposed_default: Optional[str] = None
-    rationale: Optional[str] = None
+    proposed_default: str | None = None
+    rationale: str | None = None
     source_ref: str
 
 
 class CandidateRepo(BaseModel):
     """A candidate existing implementation found by the Finder agent."""
+
     url: str
     stars: int = 0
-    last_commit: Optional[str] = None
+    last_commit: str | None = None
     similarity_score: float = 0.0
-    license: Optional[str] = None
+    license: str | None = None
 
 
-class RepoStrategy(str, Enum):
+class RepoStrategy(StrEnum):
     GENERATE_FRESH = "generate_fresh"
     ADAPT_EXISTING = "adapt_existing"
 
 
 class ComponentValidationStatus(BaseModel):
     """Per-component validation result."""
+
     component_name: str
     status: str  # "validated", "failed", "skipped"
-    details: Optional[str] = None
+    details: str | None = None
 
 
 class AuditEntry(BaseModel):
     """A single audit log entry for observability."""
+
     agent: str
     action: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
@@ -92,18 +97,18 @@ class JobState(BaseModel):
     # Identity
     job_id: str
     user_id: str
-    workspace_id: Optional[str] = None
+    workspace_id: str | None = None
 
     # Paper
     paper_source_url: str = ""
-    paper_arxiv_id: Optional[str] = None
+    paper_arxiv_id: str | None = None
     paper_title: str = ""
     paper_raw_text: str = ""
     paper_sections: list[str] = Field(default_factory=list)
     paper_equations: list[str] = Field(default_factory=list)
     paper_figures: list[str] = Field(default_factory=list)
     paper_tables: list[str] = Field(default_factory=list)
-    domain_classification: Optional[DomainClassification] = None
+    domain_classification: DomainClassification | None = None
 
     # Methodology (Extractor output)
     methodology_components: list[MethodologyComponent] = Field(default_factory=list)
@@ -111,7 +116,7 @@ class JobState(BaseModel):
 
     # Discovery (Finder output)
     candidate_repos: list[CandidateRepo] = Field(default_factory=list)
-    chosen_repo_strategy: Optional[RepoStrategy] = None
+    chosen_repo_strategy: RepoStrategy | None = None
 
     # Generation (Scaffolder output)
     scaffold_file_tree: list[str] = Field(default_factory=list)
@@ -121,13 +126,13 @@ class JobState(BaseModel):
 
     # Containerization (DevOps output)
     dockerfile: str = ""
-    compose_config: Optional[str] = None
+    compose_config: str | None = None
     gpu_required: bool = False
 
     # Validation (Reviewer output)
     validation_attempt_count: int = 0
-    validation_last_error: Optional[str] = None
-    fidelity_score: Optional[float] = None
+    validation_last_error: str | None = None
+    fidelity_score: float | None = None
     per_component_status: list[ComponentValidationStatus] = Field(default_factory=list)
 
     # Documentation (DocGenerator output)

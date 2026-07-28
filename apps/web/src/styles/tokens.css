@@ -1,0 +1,232 @@
+/*
+ * PaperToProd — Design System Tokens
+ * Source: Doc 07 (Design System)
+ *
+ * All design primitives live here as CSS custom properties.
+ * Components reference these tokens — never raw values.
+ */
+
+/* ══════════════════════════════════════════════════════════
+   COLOR PALETTE
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Brand ──────────────────────────────────────────── */
+  --color-accent: #7C6CF0;
+  --color-accent-hover: #6B5BD4;
+  --color-accent-subtle: rgba(124, 108, 240, 0.12);
+  --color-accent-muted: rgba(124, 108, 240, 0.24);
+
+  /* ── Status ─────────────────────────────────────────── */
+  --color-status-success: #34D399;
+  --color-status-warning: #FBBF24;
+  --color-status-error: #F87171;
+  --color-status-info: #60A5FA;
+
+  /* ── Agent accent colors ────────────────────────────── */
+  --color-agent-extractor: #818CF8;
+  --color-agent-finder: #34D399;
+  --color-agent-scaffolder: #F59E0B;
+  --color-agent-devops: #60A5FA;
+  --color-agent-reviewer: #F472B6;
+  --color-agent-docgen: #A78BFA;
+
+  /* ── Fidelity score gradient stops ──────────────────── */
+  --color-fidelity-low: #F87171;
+  --color-fidelity-mid: #FBBF24;
+  --color-fidelity-high: #34D399;
+
+  /* ── Breakpoints (for JS reference; CSS uses @media) ── */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+}
+
+/* ── Light Mode (default) ─────────────────────────────── */
+[data-theme="light"], :root:not([data-theme]) {
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F8F8FA;
+  --color-bg-tertiary: #F0F0F4;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-inverse: #18181B;
+
+  --color-text-primary: #18181B;
+  --color-text-secondary: #71717A;
+  --color-text-tertiary: #A1A1AA;
+  --color-text-inverse: #FAFAFA;
+  --color-text-accent: var(--color-accent);
+
+  --color-border-primary: #E4E4E7;
+  --color-border-secondary: #F4F4F5;
+  --color-border-focus: var(--color-accent);
+
+  --color-surface-overlay: rgba(0, 0, 0, 0.4);
+  --color-surface-glass: rgba(255, 255, 255, 0.72);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Dark Mode ────────────────────────────────────────── */
+[data-theme="dark"] {
+  --color-bg-primary: #09090B;
+  --color-bg-secondary: #18181B;
+  --color-bg-tertiary: #27272A;
+  --color-bg-elevated: #1E1E22;
+  --color-bg-inverse: #FAFAFA;
+
+  --color-text-primary: #FAFAFA;
+  --color-text-secondary: #A1A1AA;
+  --color-text-tertiary: #71717A;
+  --color-text-inverse: #18181B;
+  --color-text-accent: var(--color-accent);
+
+  --color-border-primary: #27272A;
+  --color-border-secondary: #3F3F46;
+  --color-border-focus: var(--color-accent);
+
+  --color-surface-overlay: rgba(0, 0, 0, 0.6);
+  --color-surface-glass: rgba(24, 24, 27, 0.72);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* ══════════════════════════════════════════════════════════
+   TYPOGRAPHY
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Font families ──────────────────────────────────── */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
+
+  /* ── Type scale ─────────────────────────────────────── */
+  --type-display-size: 3rem;        /* 48px */
+  --type-display-height: 1.1;
+  --type-display-weight: 700;
+  --type-display-tracking: -0.02em;
+
+  --type-h1-size: 2.25rem;          /* 36px */
+  --type-h1-height: 1.2;
+  --type-h1-weight: 700;
+  --type-h1-tracking: -0.02em;
+
+  --type-h2-size: 1.5rem;           /* 24px */
+  --type-h2-height: 1.3;
+  --type-h2-weight: 600;
+  --type-h2-tracking: -0.01em;
+
+  --type-h3-size: 1.25rem;          /* 20px */
+  --type-h3-height: 1.4;
+  --type-h3-weight: 600;
+  --type-h3-tracking: 0;
+
+  --type-body-size: 0.9375rem;      /* 15px */
+  --type-body-height: 1.6;
+  --type-body-weight: 400;
+
+  --type-body-sm-size: 0.8125rem;   /* 13px */
+  --type-body-sm-height: 1.5;
+  --type-body-sm-weight: 400;
+
+  --type-caption-size: 0.75rem;     /* 12px */
+  --type-caption-height: 1.4;
+  --type-caption-weight: 500;
+  --type-caption-tracking: 0.01em;
+
+  --type-mono-size: 0.8125rem;      /* 13px */
+  --type-mono-height: 1.6;
+  --type-mono-weight: 400;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SPACING (4px base unit)
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+}
+
+/* ══════════════════════════════════════════════════════════
+   CORNER RADIUS
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MOTION / ANIMATION (Doc 05)
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Durations ──────────────────────────────────────── */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-pipeline: 450ms;
+
+  /* ── Easings ────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Spring configs (for Framer Motion JS) ──────────── */
+  /* spring.snappy:  { stiffness: 300, damping: 24 }       */
+  /* spring.settle:  { stiffness: 200, damping: 28 }       */
+  /* spring.pipeline: { stiffness: 180, damping: 20 }      */
+  /* spring.celebration: { stiffness: 260, damping: 18 }   */
+}
+
+/* ══════════════════════════════════════════════════════════
+   LAYOUT
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  --sidebar-width-expanded: 240px;
+  --sidebar-width-collapsed: 64px;
+  --topbar-height: 56px;
+  --content-max-width: 1200px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ══════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+    --duration-pipeline: 0ms;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
