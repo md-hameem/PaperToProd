@@ -8,15 +8,15 @@ PaperToProd is a multi-agent research reproduction engine that reads an academic
 
 ## Current Status
 
-🟡 **Phase 0 — Foundation & Project Setup** (In Progress)
+🟡 **Phase 0 — Foundation & Project Setup** (Near Complete)
 
 | Milestone | Status |
 |---|---|
 | 0.1 Repository & Monorepo Structure | ✅ Done |
 | 0.2 Development Environment | ✅ Done |
-| 0.3 CI/CD Pipeline | 🔧 Partial (workflow created, image build & registry pending) |
-| 0.4 Design System Foundation | ⬜ Not Started |
-| 0.5 Shared Component Library | ⬜ Not Started |
+| 0.3 CI/CD Pipeline | 🔧 Partial (lint/test/typecheck done — image build & registry pending) |
+| 0.4 Design System Foundation | ✅ Done |
+| 0.5 Shared Component Library | 🔧 Partial (8/17 core components built, layout components pending) |
 
 See [ProjectPlanPhase.md](ProjectPlanPhase.md) for the full roadmap and task tracker.
 
@@ -28,7 +28,7 @@ PaperToProd/
 │   ├── api/            → FastAPI monolith (Auth, Jobs, Billing, Integrations, Gallery)
 │   ├── worker/         → Celery + LangGraph orchestration (AI agent pipeline)
 │   ├── sandbox-svc/    → Isolated code execution service (gVisor/Firecracker)
-│   └── web/            → Next.js frontend
+│   └── web/            → Next.js 16 frontend (TypeScript, Framer Motion)
 │
 ├── packages/
 │   └── shared-schemas/ → Shared Pydantic models (JobState, events)
@@ -60,7 +60,8 @@ PaperToProd/
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | Next.js · TypeScript · Framer Motion |
+| **Frontend** | Next.js 16 · TypeScript · Framer Motion · Lucide React · CSS Modules |
+| **Design System** | CSS custom properties (tokens) · Inter + JetBrains Mono · Dark/light mode |
 | **Backend API** | FastAPI · Python 3.12 |
 | **AI Orchestration** | LangGraph · Claude · OpenAI (fallback) |
 | **Task Queue** | Celery · Redis |
@@ -72,7 +73,7 @@ PaperToProd/
 | **Infrastructure** | Terraform · Helm |
 | **CI/CD** | GitHub Actions |
 | **Observability** | OpenTelemetry · Prometheus · Grafana |
-| **Code Quality** | Ruff · mypy · pytest |
+| **Code Quality** | Ruff · mypy · pre-commit (10 hooks) · pytest |
 
 ## Getting Started
 
@@ -81,6 +82,7 @@ PaperToProd/
 - Python 3.12+
 - Node.js 20+
 - Docker & Docker Compose
+- Git
 
 ### Quick Start
 
@@ -101,15 +103,53 @@ pip install -r apps/api/requirements.txt \
             -r apps/worker/requirements.txt \
             -r apps/sandbox-svc/requirements.txt
 
+# Install pre-commit hooks
+pip install pre-commit
+pre-commit install
+
 # Start all infrastructure services
 docker compose -f docker-compose.dev.yml up -d
 
 # Run the API server
 cd apps/api
 uvicorn app.main:app --reload --port 8000
+
+# In another terminal — run the frontend
+cd apps/web
+npm install
+npm run dev
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
+
+## Frontend Component Library
+
+The shared UI library lives in `apps/web/src/components/ui/` and exposes all components through a single barrel import:
+
+```tsx
+import { Button, Card, Modal, StatusChip, ProgressRing } from "@/components/ui";
+```
+
+### Available Components
+
+| Component | Description |
+|---|---|
+| `Button` | 4 variants (primary/secondary/ghost/destructive) × 3 sizes, loading spinner, icon slots |
+| `TextInput` | Label, leading/trailing icon, focus ring animation, error/hint states |
+| `Toggle` | Spring-animated thumb (Doc 05), ARIA switch role |
+| `Card` | 3 variants (default/elevated/outlined), optional hover elevation via Framer Motion |
+| `Modal` | Glassmorphism overlay (20px blur), spring entrance, Escape/click-outside dismiss |
+| `StatusChip` | Status colors (queued/running/complete/failed) + agent accent colors, animated pulse |
+| `ProgressRing` | Animated SVG arc, fidelity-score color gradient (red→yellow→green) |
+| `Skeleton` | 4 shape variants (text/circle/rect/inline), shimmer animation |
+
+### Design Tokens
+
+All design primitives are defined as CSS custom properties in `apps/web/src/styles/tokens.css`:
+- **Colors** — Dark + light mode, brand accent `#7C6CF0`, 6 status colors, 6 agent colors
+- **Typography** — 8-stop scale from `display` (48px) to `caption` (12px)
+- **Spacing** — 4px base unit, 14-stop progression
+- **Motion** — 5 duration tokens, 3 easings, 4 Framer Motion spring presets
 
 ## Key Concepts
 
@@ -148,7 +188,7 @@ Full architecture documentation lives in [`Docs/`](Docs/):
 
 | Phase | Focus | Status |
 |---|---|---|
-| **Phase 0** | Foundation & Project Setup | 🟡 In Progress |
+| **Phase 0** | Foundation & Project Setup | 🟡 Near Complete |
 | **Phase 1** | MVP — Core Loop (CV papers, single-user, automatic pipeline) | ⬜ Not Started |
 | **Phase 2** | V1 — Multi-Domain, Teams, Billing | ⬜ Not Started |
 | **Phase 3** | V2 — Gallery, Benchmarks, Enterprise Foundations | ⬜ Not Started |

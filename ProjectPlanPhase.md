@@ -1,7 +1,7 @@
 # PaperToProd — Project Phase Plan & Tracker
 
 **Created:** 2026-07-16  
-**Last Updated:** 2026-07-18  
+**Last Updated:** 2026-07-28  
 **Source:** Docs 01–16 (Executive Vision through Engineering Roadmap)  
 **Legend:** `[ ]` Not started · `[/]` In progress · `[x]` Completed
 
@@ -11,13 +11,15 @@
 
 > **Goal:** Establish the monorepo, tooling, design system, and development environment before any feature work begins.
 
+**Progress:** ~80% complete. All tooling (Ruff, mypy, pre-commit), infrastructure (Docker Compose), Next.js frontend with full design system, and 8/17 UI components are built and passing CI. Remaining: CI image build, 9 more components, and 4 layout components.
+
 ### 0.1 — Repository & Monorepo Structure
 - [x] Initialize Git repository
 - [x] Create monorepo directory layout per Doc 09 §13:
   - [x] `/apps/api` — FastAPI monolith
   - [x] `/apps/worker` — Celery + LangGraph orchestration
   - [x] `/apps/sandbox-svc` — Isolated execution service
-  - [x] `/apps/web` — Next.js frontend (placeholder, to be initialized with Next.js in 0.4)
+  - [x] `/apps/web` — Next.js 16 frontend (TypeScript, Framer Motion, CSS Modules)
   - [x] `/packages/shared-schemas` — Shared Pydantic models (JobState, etc.)
   - [x] `/infra` — Terraform/Helm configurations
   - [x] `/docs` — Existing documentation (Docs 01–16)
