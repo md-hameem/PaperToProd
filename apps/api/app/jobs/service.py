@@ -87,9 +87,9 @@ async def create_job(
     await db.commit()
     await db.refresh(job)
 
-    # TODO: Dispatch Celery task here
-    # from app.worker import run_pipeline
-    # run_pipeline.delay(job.id)
+    from app.worker import run_pipeline
+
+    run_pipeline.delay(job.id, paper_url, arxiv_id)
 
     return job
 

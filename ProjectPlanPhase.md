@@ -150,9 +150,6 @@
 - [x] Worker publishes state-delta events to Redis on every agent transition
 
 ### 1.5 — AI Agent Pipeline — Extractor Agent (Doc 08 §3.1)
-- [ ] Implement paper ingestion & parsing:
-  - [ ] Fetch paper from arXiv (prefer LaTeX source over PDF when available)
-  - [ ] Parse full text, section structure, equations (LaTeX), figures, tables
   - [ ] Detect primary domain classification (CV for MVP)
 - [ ] Implement multi-pass extraction prompt strategy:
   - [ ] Pass 1 — Structured outline extraction (architecture, training procedure, evaluation)
