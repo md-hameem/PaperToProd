@@ -54,9 +54,11 @@ def _register_routers(app: FastAPI) -> None:
     """Register all module routers under /api/v1."""
     from app.auth.router import router as auth_router
     from app.jobs.router import router as jobs_router
+    from app.websocket.router import router as websocket_router
 
     app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
     app.include_router(jobs_router, prefix="/api/v1/jobs", tags=["Jobs"])
+    app.include_router(websocket_router, tags=["WebSockets"])
 
     # Future: billing, integrations, gallery, notifications routers
 

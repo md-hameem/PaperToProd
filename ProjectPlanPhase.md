@@ -118,11 +118,11 @@
 - [x] Implement `JobState` Pydantic model in `packages/shared-schemas` per Doc 08 §2
 
 ### 1.2 — Authentication (Doc 09 §7, simplified for MVP)
-- [ ] Implement OAuth flow — GitHub provider (primary for developer audience)
-- [ ] Implement OAuth flow — Google provider (secondary)
-- [ ] Implement JWT access token issuance (short-lived)
-- [ ] Implement refresh token flow (httpOnly cookies)
-- [ ] Build auth middleware for FastAPI route protection
+- [x] Implement OAuth flow — GitHub provider (primary for developer audience)
+- [x] Implement OAuth flow — Google provider (secondary)
+- [x] Implement JWT access token issuance (short-lived)
+- [x] Implement refresh token flow (httpOnly cookies)
+- [x] Build auth middleware for FastAPI route protection
 - [ ] *Skip for MVP:* email/password auth, workspaces/RBAC, API keys
 
 ### 1.3 — Backend API — Core Job Endpoints (Doc 14)
@@ -141,13 +141,13 @@
 - [x] `GET /api/v1/jobs/{job_id}/artifacts/repository` — Signed download URL
 
 ### 1.4 — WebSocket Real-Time Streaming (Doc 09 §4 / Doc 14 §9)
-- [ ] Implement Redis pub/sub channel per `job_id` for state-delta events
-- [ ] Implement `WS /ws/jobs/{job_id}` endpoint
-  - [ ] Auth via short-lived query-param token
-  - [ ] Stream event types: `agent_transition`, `log_line`, `job_complete`, `job_failed`
-  - [ ] Monotonic `sequence` numbers on all events
-- [ ] Implement `GET /api/v1/jobs/{job_id}/events?since_sequence=N` for reconnection replay
-- [ ] Worker publishes state-delta events to Redis on every agent transition
+- [x] Implement Redis pub/sub channel per `job_id` for state-delta events
+- [x] Implement `WS /ws/jobs/{job_id}` endpoint
+  - [x] Auth via short-lived query-param token
+  - [x] Stream event types: `agent_transition`, `log_line`, `job_complete`, `job_failed`
+  - [x] Monotonic `sequence` numbers on all events
+- [x] Implement `GET /api/v1/jobs/{job_id}/events?since_sequence=N` for reconnection replay
+- [x] Worker publishes state-delta events to Redis on every agent transition
 
 ### 1.5 — AI Agent Pipeline — Extractor Agent (Doc 08 §3.1)
 - [ ] Implement paper ingestion & parsing:
