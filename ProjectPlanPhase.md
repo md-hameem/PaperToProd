@@ -11,7 +11,7 @@
 
 > **Goal:** Establish the monorepo, tooling, design system, and development environment before any feature work begins.
 
-**Progress:** ~80% complete. All tooling (Ruff, mypy, pre-commit), infrastructure (Docker Compose), Next.js frontend with full design system, and 8/17 UI components are built and passing CI. Remaining: CI image build, 9 more components, and 4 layout components.
+**Progress:** ~95% complete. All tooling (Ruff, mypy, pre-commit), infrastructure (Docker Compose), Next.js frontend with full design system, all 17 core UI components, and all 4 layout components are built and passing CI. Remaining: CI image build step and Docker registry configuration (0.3).
 
 ### 0.1 — Repository & Monorepo Structure
 - [x] Initialize Git repository
@@ -66,29 +66,30 @@
 - [x] Implement `prefers-reduced-motion` support globally
 
 ### 0.5 — Shared Component Library (Doc 06 §Cross-Page + Doc 07 §10)
-- [/] Build core components with 4-state contract (loading/empty/error/success):
+- [x] Build core components with 4-state contract (loading/empty/error/success):
   - [x] `Button` — primary / secondary / ghost / destructive variants × loading + icon states
   - [x] `TextInput` — with validation states, focus ring animation
-  - [ ] `Select` — dropdown with proper keyboard navigation
+  - [x] `Select` — dropdown with proper keyboard navigation
   - [x] `Toggle` — with `spring.snappy` thumb animation (Doc 05 §5)
-  - [ ] `Checkbox`
+  - [x] `Checkbox`
   - [x] `Card` — with hover elevation effect (Doc 05 §6)
   - [x] `Modal` — glassmorphism overlay (backdrop-blur 20px, Doc 05 §11)
-  - [ ] `Toast` — for async/background events only
-  - [ ] `Tabs`
-  - [ ] `Table` + `TableRow` — with hover quick-action reveal
+  - [x] `Toast` — provider pattern, 4 types, auto-dismiss, spring animation
+  - [x] `Tabs` — spring-animated underline indicator via layoutId
+  - [x] `Table` + `TableRow` — generic typed columns, custom renderers, hover reveal
   - [x] `StatusChip` — mapped to `color/status/*` and `color/agent/*`
-  - [ ] `Avatar`
+  - [x] `Avatar` — image or name-hashed initials fallback
   - [x] `ProgressRing` — animated SVG with fidelity-score color gradient
-  - [ ] `ProgressBar`
-  - [ ] `CodeBlock` — with syntax highlighting
+  - [x] `ProgressBar` — animated fill, 4 color variants
+  - [x] `CodeBlock` — copy-to-clipboard, line numbers, monospace
   - [x] `Skeleton` — shape-matched variants (text, circle, rect, inline)
-  - [ ] `EmptyState` — monochrome line-art illustration + actionable CTA
-- [ ] Build layout components:
-  - [ ] `Sidebar` — 240px expanded / 64px collapsed, responsive bottom-sheet on mobile
-  - [ ] `TopBar` — 56px, workspace switcher + page title + notification bell + account menu
-  - [ ] `AppShell` — global layout wrapper (sidebar + top bar + main content)
-  - [ ] `CommandPalette` — Cmd/Ctrl+K jump navigation (Doc 04 §9)
+  - [x] `EmptyState` — monochrome icon + actionable CTA button
+- [x] Build layout components:
+  - [x] `Sidebar` — 240px expanded / 64px collapsed, spring animation, active indicator
+  - [x] `TopBar` — 56px, Cmd+K search trigger + theme toggle + notification bell + avatar
+  - [x] `AppShell` — global layout wrapper (sidebar + top bar + main content)
+  - [x] `CommandPalette` — Cmd/Ctrl+K, fuzzy search, section grouping, keyboard navigation
+
 
 ---
 

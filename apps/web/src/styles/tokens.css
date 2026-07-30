@@ -161,6 +161,12 @@
   --space-16: 4rem;     /* 64px */
   --space-20: 5rem;     /* 80px */
   --space-24: 6rem;     /* 96px */
+
+  /* ── Layout ──────────────────────────────────────────── */
+  --topbar-height: 56px;
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 64px;
+  --content-max-width: 1200px;
 }
 
 /* ══════════════════════════════════════════════════════════
