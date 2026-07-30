@@ -5,10 +5,24 @@ Modular monolith serving REST + WebSocket endpoints.
 Modules: auth, jobs, billing, integrations, gallery, notifications, websocket.
 """
 
+import contextlib
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+
+
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize storage buckets on startup
+    from app.storage import init_buckets
+
+    try:
+        init_buckets()
+    except Exception as e:
+        print(f"Warning: Failed to initialize MinIO buckets: {e}")
+    yield
 
 
 def create_app() -> FastAPI:
@@ -18,6 +32,7 @@ def create_app() -> FastAPI:
         version="0.1.0",
         docs_url="/api/docs",
         openapi_url="/api/openapi.json",
+        lifespan=lifespan,
     )
 
     # CORS

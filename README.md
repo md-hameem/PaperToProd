@@ -8,7 +8,8 @@ PaperToProd is a multi-agent research reproduction engine that reads an academic
 
 ## Current Status
 
-🟡 **Phase 0 — Foundation & Project Setup** (Near Complete)
+🟢 **Phase 0 — Foundation & Project Setup** (Complete)
+🟡 **Phase 1 — MVP** (In Progress)
 
 | Milestone | Status |
 |---|---|
@@ -16,7 +17,8 @@ PaperToProd is a multi-agent research reproduction engine that reads an academic
 | 0.2 Development Environment | ✅ Done |
 | 0.3 CI/CD Pipeline | 🔧 Partial (lint/test/typecheck done — image build & registry pending) |
 | 0.4 Design System Foundation | ✅ Done |
-| 0.5 Shared Component Library | 🔧 Partial (8/17 core components built, layout components pending) |
+| 0.5 Shared Component Library | ✅ Done (17 core + 4 layout components) |
+| 1.1 Database & Data Layer | 🟡 In Progress |
 
 See [ProjectPlanPhase.md](ProjectPlanPhase.md) for the full roadmap and task tracker.
 
@@ -188,8 +190,8 @@ Full architecture documentation lives in [`Docs/`](Docs/):
 
 | Phase | Focus | Status |
 |---|---|---|
-| **Phase 0** | Foundation & Project Setup | 🟡 Near Complete |
-| **Phase 1** | MVP — Core Loop (CV papers, single-user, automatic pipeline) | ⬜ Not Started |
+| **Phase 0** | Foundation & Project Setup | 🟢 Complete |
+| **Phase 1** | MVP — Core Loop (CV papers, single-user, automatic pipeline) | 🟡 In Progress |
 | **Phase 2** | V1 — Multi-Domain, Teams, Billing | ⬜ Not Started |
 | **Phase 3** | V2 — Gallery, Benchmarks, Enterprise Foundations | ⬜ Not Started |
 | **Phase 4** | Enterprise — On-Prem, SSO, Compliance | ⬜ Not Started |

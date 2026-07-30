@@ -1,7 +1,7 @@
 # PaperToProd — Project Phase Plan & Tracker
 
 **Created:** 2026-07-16  
-**Last Updated:** 2026-07-28  
+**Last Updated:** 2026-07-31  
 **Source:** Docs 01–16 (Executive Vision through Engineering Roadmap)  
 **Legend:** `[ ]` Not started · `[/]` In progress · `[x]` Completed
 
@@ -99,23 +99,23 @@
 > **Exit Criteria (Doc 02 §13 / Doc 16 §1):** ≥80% of a 10–15 CV paper Golden Dataset produce a validated artifact without human intervention, median time-to-runnable ≤20 minutes.
 
 ### 1.1 — Database & Data Layer (Doc 10)
-- [ ] Set up Alembic migration framework
-- [ ] Create core database schemas:
-  - [ ] `users` table (id, email, auth_provider, created_at)
-  - [ ] `jobs` table (id, user_id, paper_source_url, paper_arxiv_id, paper_title, domain_classification, status enum, fidelity_score, compute_cost_cents, token_cost_cents, created_at, completed_at)
-  - [ ] `job_state_checkpoints` table (id, job_id, node_name, state_snapshot JSONB, created_at)
-  - [ ] `job_events` table (id, job_id, agent_name, event_type, payload JSONB, created_at)
-  - [ ] `job_artifacts` table (job_id, artifact_type enum, storage_key, created_at)
-- [ ] Create database indexes:
-  - [ ] `jobs(user_id, created_at DESC)` — dashboard queries
-  - [ ] `jobs(paper_arxiv_id)` — duplicate detection
-  - [ ] `job_events(job_id, created_at)` — sequential event reads
-  - [ ] Partial index on `jobs(status)` for active jobs
-- [ ] Configure MinIO buckets:
-  - [ ] `/papers/{arxiv_id}/source.pdf`
-  - [ ] `/jobs/{job_id}/repository.zip`
-  - [ ] `/jobs/{job_id}/logs/full.log`
-- [ ] Implement `JobState` Pydantic model in `packages/shared-schemas` per Doc 08 §2
+- [x] Set up Alembic migration framework
+- [x] Create core database schemas:
+  - [x] `users` table (id, email, auth_provider, created_at)
+  - [x] `jobs` table (id, user_id, paper_source_url, paper_arxiv_id, paper_title, domain_classification, status enum, fidelity_score, compute_cost_cents, token_cost_cents, created_at, completed_at)
+  - [x] `job_state_checkpoints` table (id, job_id, node_name, state_snapshot JSONB, created_at)
+  - [x] `job_events` table (id, job_id, agent_name, event_type, payload JSONB, created_at)
+  - [x] `job_artifacts` table (job_id, artifact_type enum, storage_key, created_at)
+- [x] Create database indexes:
+  - [x] `jobs(user_id, created_at DESC)` — dashboard queries
+  - [x] `jobs(paper_arxiv_id)` — duplicate detection
+  - [x] `job_events(job_id, created_at)` — sequential event reads
+  - [x] Partial index on `jobs(status)` for active jobs
+- [x] Configure MinIO buckets:
+  - [x] `/papers/{arxiv_id}/source.pdf`
+  - [x] `/jobs/{job_id}/repository.zip`
+  - [x] `/jobs/{job_id}/logs/full.log`
+- [x] Implement `JobState` Pydantic model in `packages/shared-schemas` per Doc 08 §2
 
 ### 1.2 — Authentication (Doc 09 §7, simplified for MVP)
 - [ ] Implement OAuth flow — GitHub provider (primary for developer audience)
@@ -126,19 +126,19 @@
 - [ ] *Skip for MVP:* email/password auth, workspaces/RBAC, API keys
 
 ### 1.3 — Backend API — Core Job Endpoints (Doc 14)
-- [ ] `POST /api/v1/jobs` — Create job
-  - [ ] Accept `arxiv_url` source type (defer PDF upload and `arxiv_id`-only for MVP)
-  - [ ] Client-side + server-side URL format validation
+- [x] `POST /api/v1/jobs` — Create job
+  - [x] Accept `arxiv_url` source type (defer PDF upload and `arxiv_id`-only for MVP)
+  - [x] Client-side + server-side URL format validation
   - [ ] Fetch arXiv metadata — detect withdrawn papers, reject with explanation
   - [ ] Pre-flight reproducibility check — detect survey/position papers (FR-ING-03)
-  - [ ] Duplicate submission detection → return `409` with `existing_job_id`
-  - [ ] Dispatch Celery task for the orchestration pipeline
-  - [ ] Return `201` with `job_id`, `status: queued`
-- [ ] `GET /api/v1/jobs/{job_id}` — Full job state snapshot
-- [ ] `GET /api/v1/jobs` — List jobs for current user (cursor-based pagination)
-- [ ] `POST /api/v1/jobs/{job_id}/cancel` — Cancel running job
+  - [x] Duplicate submission detection → return `409` with `existing_job_id`
+  - [x] Dispatch Celery task for the orchestration pipeline (Stubbed)
+  - [x] Return `201` with `job_id`, `status: queued`
+- [x] `GET /api/v1/jobs/{job_id}` — Full job state snapshot
+- [x] `GET /api/v1/jobs` — List jobs for current user (cursor-based pagination)
+- [x] `POST /api/v1/jobs/{job_id}/cancel` — Cancel running job
 - [ ] `GET /api/v1/jobs/{job_id}/logs` — Full log stream (JSON + text formats)
-- [ ] `GET /api/v1/jobs/{job_id}/artifacts/repository` — Signed download URL
+- [x] `GET /api/v1/jobs/{job_id}/artifacts/repository` — Signed download URL
 
 ### 1.4 — WebSocket Real-Time Streaming (Doc 09 §4 / Doc 14 §9)
 - [ ] Implement Redis pub/sub channel per `job_id` for state-delta events
