@@ -1,0 +1,52 @@
+[
+  {
+    "id": "resnet",
+    "paper_url": "https://arxiv.org/abs/1512.03385",
+    "arxiv_id": "1512.03385",
+    "title": "Deep Residual Learning for Image Recognition",
+    "expected_components": [
+      "residual block",
+      "skip connection",
+      "batch normalization",
+      "global average pooling"
+    ],
+    "expected_repo_url": "https://github.com/KaimingHe/deep-residual-networks",
+    "known_ambiguities": [
+      "Exact weight initialization strategy sometimes implicit",
+      "Data augmentation specifics for ImageNet not fully detailed in all sections"
+    ]
+  },
+  {
+    "id": "vit",
+    "paper_url": "https://arxiv.org/abs/2010.11929",
+    "arxiv_id": "2010.11929",
+    "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+    "expected_components": [
+      "patch embedding",
+      "cls token",
+      "transformer encoder",
+      "multi-head self attention"
+    ],
+    "expected_repo_url": "https://github.com/google-research/vision_transformer",
+    "known_ambiguities": [
+      "Optimizer hyperparameters (Adam beta1, beta2) can be tricky to find",
+      "Learning rate warmup schedule details"
+    ]
+  },
+  {
+    "id": "yolov7",
+    "paper_url": "https://arxiv.org/abs/2207.02696",
+    "arxiv_id": "2207.02696",
+    "title": "YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors",
+    "expected_components": [
+      "extended efficient layer aggregation networks",
+      "model scaling for concatenation-based models",
+      "re-parameterized convolution"
+    ],
+    "expected_repo_url": "https://github.com/WongKinYiu/yolov7",
+    "known_ambiguities": [
+      "Complex training schedule with multiple auxiliary heads",
+      "Exact augmentation mosaic parameters"
+    ]
+  }
+]

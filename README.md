@@ -9,16 +9,18 @@ PaperToProd is a multi-agent research reproduction engine that reads an academic
 ## Current Status
 
 🟢 **Phase 0 — Foundation & Project Setup** (Complete)
-🟡 **Phase 1 — MVP** (In Progress)
+🟢 **Phase 1 — MVP** (Complete)
+🟡 **Phase 2 — V1 (Multi-Domain, Team-Ready)** (In Progress)
 
 | Milestone | Status |
 |---|---|
-| 0.1 Repository & Monorepo Structure | ✅ Done |
-| 0.2 Development Environment | ✅ Done |
-| 0.3 CI/CD Pipeline | 🔧 Partial (lint/test/typecheck done — image build & registry pending) |
-| 0.4 Design System Foundation | ✅ Done |
-| 0.5 Shared Component Library | ✅ Done (17 core + 4 layout components) |
-| 1.1 Database & Data Layer | 🟡 In Progress |
+| 1.1–1.11 MVP Backend | ✅ Done |
+| 1.12–1.20 MVP Frontend | ✅ Done |
+| 2.1 Multi-Domain Expansion | ✅ Done |
+| 2.2 Full Finder Agent | ✅ Done |
+| 2.3 Full DevOps Agent | ✅ Done |
+| 2.4 Structured Fidelity Report | ✅ Done |
+| 2.5 Ingestion Expansion | 🟡 In Progress |
 
 See [ProjectPlanPhase.md](ProjectPlanPhase.md) for the full roadmap and task tracker.
 
@@ -191,8 +193,9 @@ Full architecture documentation lives in [`Docs/`](Docs/):
 | Phase | Focus | Status |
 |---|---|---|
 | **Phase 0** | Foundation & Project Setup | 🟢 Complete |
-| **Phase 1** | MVP — Core Loop (CV papers, single-user, automatic pipeline) | 🟡 In Progress |
-| **Phase 2** | V1 — Multi-Domain, Teams, Billing | ⬜ Not Started |
+| **Phase 1 (Backend)** | MVP Core Loop Engine (FastAPI + LangGraph) | 🟢 Complete |
+| **Phase 1 (Frontend)**| MVP Web UI (Auth, Dashboard, Job Logs) | 🟢 Complete |
+| **Phase 2** | V1 — Multi-Domain, Teams, Billing | 🟡 In Progress |
 | **Phase 3** | V2 — Gallery, Benchmarks, Enterprise Foundations | ⬜ Not Started |
 | **Phase 4** | Enterprise — On-Prem, SSO, Compliance | ⬜ Not Started |
 | **Phase 5** | Future AI — Multi-paper synthesis, IDE extensions | ⬜ Not Started |

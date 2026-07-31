@@ -27,8 +27,8 @@ celery_app.conf.update(
 async def _run_pipeline_async(job_id: int, initial_state: dict):
     """Async wrapper to run the LangGraph pipeline."""
     async with get_checkpointer() as checkpointer:
-        # Compile graph with persistence
-        graph = graph_builder.compile(checkpointer=checkpointer)
+        # Compile graph with persistence and human-in-the-loop interruption
+        graph = graph_builder.compile(checkpointer=checkpointer, interrupt_before=["scaffolder"])
 
         from typing import Any, cast
 
@@ -56,4 +56,40 @@ def run_pipeline(self, job_id: int, paper_url: str, arxiv_id: str):
 
     except Exception as exc:
         # Update DB Job status to FAILED
+        self.retry(exc=exc, countdown=60)
+
+
+async def _resume_pipeline_async(job_id: int, approved_repo_url: str):
+    """Resume a paused LangGraph pipeline after human approval."""
+    async with get_checkpointer() as checkpointer:
+        graph = graph_builder.compile(checkpointer=checkpointer, interrupt_before=["scaffolder"])
+
+        from typing import Any, cast
+
+        config = cast("Any", {"configurable": {"thread_id": str(job_id)}})
+
+        # Update state with the user's choice
+        await graph.aupdate_state(config, {"human_approved_repo_url": approved_repo_url})
+
+        # Mark finder as fully completed in websocket so UI moves forward
+        from app.websocket.manager import publish_job_event
+
+        await publish_job_event(
+            job_id,
+            {"event_type": "agent_transition", "agent_name": "finder", "status": "completed"},
+        )
+
+        # Resume execution (passing None state)
+        await graph.ainvoke(None, config)
+
+
+@celery_app.task(name="resume_pipeline", bind=True, max_retries=3)
+def resume_pipeline(self, job_id: int, approved_repo_url: str):
+    """
+    Celery task that resumes a paused LangGraph pipeline.
+    """
+    try:
+        asyncio.run(_resume_pipeline_async(job_id, approved_repo_url))
+        return {"status": "resumed", "job_id": job_id}
+    except Exception as exc:
         self.retry(exc=exc, countdown=60)

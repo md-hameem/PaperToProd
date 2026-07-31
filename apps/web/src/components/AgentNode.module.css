@@ -1,0 +1,132 @@
+.nodeContainer {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--duration-normal) var(--ease-out);
+  margin-bottom: var(--space-4);
+}
+
+.activeContainer {
+  border-color: var(--color-accent-muted);
+  box-shadow: 0 0 0 1px var(--color-accent-muted), var(--shadow-md);
+  background: var(--color-bg-elevated);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4);
+  cursor: pointer;
+  gap: var(--space-4);
+}
+
+.header:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.statusIndicator {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconPending { color: var(--color-border-primary); }
+.iconActive { color: var(--color-accent); }
+.iconSuccess { color: var(--color-status-success); }
+.iconError { color: var(--color-status-error); }
+
+.spin {
+  animation: spin 2s linear infinite;
+}
+
+.pulse {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.statusIndicator > svg {
+  z-index: 1;
+  position: relative;
+}
+
+.meta {
+  flex: 1;
+}
+
+.label {
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.statusText {
+  font-size: var(--type-caption-size);
+  color: var(--color-text-secondary);
+}
+
+.toggleBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.toggleBtn:hover {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.logCount {
+  font-size: var(--type-caption-size);
+  font-family: var(--font-mono);
+  background: var(--color-bg-primary);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+}
+
+.logWrapper {
+  overflow: hidden;
+}
+
+.terminal {
+  background: #000000;
+  color: #A1A1AA;
+  font-family: var(--font-mono);
+  font-size: var(--type-caption-size);
+  padding: var(--space-4);
+  max-height: 300px;
+  overflow-y: auto;
+  border-top: 1px solid var(--color-border-primary);
+}
+
+.logLine {
+  margin-bottom: 4px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.logPrefix {
+  color: var(--color-status-success);
+  margin-right: 8px;
+}
+
+.emptyLog {
+  color: #71717A;
+  font-style: italic;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

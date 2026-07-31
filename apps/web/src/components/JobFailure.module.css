@@ -1,0 +1,132 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.errorIcon {
+  color: var(--color-status-error);
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  font-size: var(--type-h1-size);
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+}
+
+.reasonCard {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-left: 4px solid var(--color-status-error);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.reasonTitle {
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  color: var(--color-status-error);
+  margin-bottom: var(--space-1);
+}
+
+.reasonText {
+  font-size: var(--type-body-size);
+  color: var(--color-text-primary);
+}
+
+.logsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.logsHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logsTitle {
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-secondary);
+}
+
+.terminal {
+  background: #000;
+  color: #F87171;
+  font-family: var(--font-mono);
+  font-size: var(--type-caption-size);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  max-height: 250px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.logLine {
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.actionBar {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.primaryBtn, .secondaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  flex: 1;
+}
+
+.primaryBtn {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border: none;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.secondaryBtn {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-primary);
+}
+
+.secondaryBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-text-tertiary);
+}
+
+@media (max-width: 600px) {
+  .actionBar {
+    flex-direction: column;
+  }
+}

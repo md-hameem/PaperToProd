@@ -1,0 +1,219 @@
+.container {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-primary);
+}
+
+.main {
+  flex: 1;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--space-8) var(--space-4);
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-8);
+}
+
+.pageTitle {
+  font-size: var(--type-h2-size);
+  color: var(--color-text-primary);
+}
+
+.pageSubtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-sm-size);
+  margin-top: var(--space-1);
+}
+
+.newJobBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.newJobBtn:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.loading {
+  text-align: center;
+  padding: var(--space-12);
+  color: var(--color-text-tertiary);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-4);
+  text-align: center;
+  background: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border-primary);
+  border-radius: var(--radius-lg);
+}
+
+.emptyIconWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--color-bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}
+
+.emptyIcon {
+  color: var(--color-text-tertiary);
+}
+
+.emptyTitle {
+  font-size: var(--type-h3-size);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.emptyDesc {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+.emptyBtn {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  padding: 10px 24px;
+  border-radius: var(--radius-full);
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Table */
+.tableWrapper {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  background: var(--color-bg-tertiary);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.table td {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
+  font-size: var(--type-body-size);
+}
+
+.row {
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.row:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.row:last-child td {
+  border-bottom: none;
+}
+
+.cellId {
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary) !important;
+}
+
+.cellPaper a {
+  color: var(--color-text-accent);
+}
+
+.cellPaper a:hover {
+  text-decoration: underline;
+}
+
+.cellDate {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Status Chips */
+.statusChip {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--type-caption-size);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.completed { background: rgba(52, 211, 153, 0.15); color: var(--color-status-success); }
+.error { background: rgba(248, 113, 113, 0.15); color: var(--color-status-error); }
+.started { background: rgba(124, 108, 240, 0.15); color: var(--color-accent); }
+.pending { background: var(--color-bg-tertiary); color: var(--color-text-secondary); }
+
+.scoreBadge {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.actionHeader {
+  text-align: right;
+}
+
+.cellActions {
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.iconBtn:not(:disabled):hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+}
+
+.iconBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

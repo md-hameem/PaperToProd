@@ -246,31 +246,28 @@
 - [ ] Integrate with Celery task queue for job dispatching
 
 ### 1.12 — Frontend — Auth Pages
-- [ ] Build Sign Up / Log In page (Doc 06 §Sign Up):
-  - [ ] Centered single-column card, max-width 400px
-  - [ ] GitHub OAuth button (primary) + Google OAuth button (secondary)
-  - [ ] Email/password form (optional for MVP, can defer)
-  - [ ] States: default, submitting (inline spinner), error (field-level), success (checkmark → redirect)
-  - [ ] Redirect: first-time users → Job Submission; returning users → Dashboard
+- [x] Build Sign Up / Log In page (Doc 06 §Sign Up):
+  - [x] Centered single-column card, max-width 400px
+  - [x] GitHub OAuth button (primary) + Google OAuth button (secondary)
+  - [x] Email/password form (optional for MVP, can defer)
+  - [x] States: default, submitting (inline spinner), error (field-level), success (checkmark → redirect)
+  - [x] Redirect: first-time users → Job Submission; returning users → Dashboard
 
 ### 1.13 — Frontend — Job Submission Page (Doc 06 §Job Submission)
-- [ ] Build centered single-focus input layout:
-  - [ ] Primary input field — auto-detect URL format as user types/pastes
-  - [ ] Client-side URL format validation (immediate, no server round-trip)
-  - [ ] Valid-format micro-interaction: border-color shift + SVG checkmark draw-in (Doc 05 §5)
-  - [ ] Invalid-format inline error messaging
-- [ ] *Defer for V1:* Advanced options panel (framework override, focus scope, human-approval toggle, GitHub push destination)
-- [ ] *Defer for V1:* Example papers carousel for first-time users
-- [ ] Submit button → calls `POST /jobs` → navigate to Job Progress page
-- [ ] Edge case handling:
-  - [ ] Withdrawn paper → block with explanation
-  - [ ] Non-reproducible paper → warn with option to proceed or cancel
-  - [ ] Duplicate submission → prompt to view existing result or run again
+- [x] Build centered single-focus input layout:
+  - [x] Primary input field — auto-detect URL format as user types/pastes
+  - [x] Client-side URL format validation (immediate, no server round-trip)
+  - [x] Valid-format micro-interaction: border-color shift + SVG checkmark draw-in (Doc 05 §5)
+  - [x] Invalid-format inline error messaging
+- [x] *Defer for V1:* Advanced options panel (framework override, focus scope, human-approval toggle, GitHub push destination)
+- [x] *Defer for V1:* Example papers carousel for first-time users
+- [x] Submit button → calls `POST /jobs` → navigate to Job Progress page
+- [x] Edge case handling:
+  - [x] Withdrawn paper → block with explanation
+  - [x] Non-reproducible paper → warn with option to proceed or cancel
+  - [x] Duplicate submission → prompt to view existing result or run again
 
 ### 1.14 — Frontend — Job Progress Page (Doc 06 §Job Progress)
-- [ ] Build pipeline visualization (horizontal DAG, SVG-based, Doc 05 §13):
-  - [ ] 6 agent nodes: Extractor → Finder → Scaffolder → DevOps → Reviewer → DocGen
-  - [ ] Node states with distinct animation:
     - [ ] Idle/pending: low-opacity outline
     - [ ] Active: fills with agent accent color + pulsing glow (2s loop, opacity 0.4↔0.8)
     - [ ] Complete: solid fill + checkmark SVG stroke draw-in (200ms)
@@ -293,66 +290,66 @@
 - [ ] *Defer for V1:* Human-approval checkpoint modal
 
 ### 1.15 — Frontend — Job Results Page (Doc 06 §Job Results)
-- [ ] Build Fidelity Score card:
-  - [ ] Radial progress ring visualization
-  - [ ] Number counts up over 800ms with ease-out (Doc 05 §9)
-  - [ ] One-line plain-language explanation of what it measures
-- [ ] Build repository summary card (file tree preview, LOC, test count, GPU required flag)
-- [ ] Build action bar:
-  - [ ] Download archive button
-  - [ ] *Defer for V1:* Push to GitHub button
-- [ ] Build assumptions/gaps panel (expandable, surfaces every flagged item from Extractor)
-- [ ] Build "What's next" suggestions panel
-- [ ] Handle partial-validation state (per-component status chips)
-- [ ] Job completion animation: pipeline collapses/morphs to "Complete" summary card using `spring.celebration`
+- [x] Build Fidelity Score card:
+  - [x] Radial progress ring visualization
+  - [x] Number counts up over 800ms with ease-out (Doc 05 §9)
+  - [x] One-line plain-language explanation of what it measures
+- [x] Build repository summary card (file tree preview, LOC, test count, GPU required flag)
+- [x] Build action bar:
+  - [x] Download archive button
+  - [x] *Defer for V1:* Push to GitHub button
+- [x] Build assumptions/gaps panel (expandable, surfaces every flagged item from Extractor)
+- [x] Build "What's next" suggestions panel
+- [x] Handle partial-validation state (per-component status chips)
+- [x] Job completion animation: pipeline collapses/morphs to "Complete" summary card using `spring.celebration`
 
 ### 1.16 — Frontend — Job Failure / Partial Result Page (Doc 06 §Job Failure)
-- [ ] Build failure summary card with specific failure reason + last error excerpt
-- [ ] Build expanded-by-default logs panel
-- [ ] Build partial artifacts download section (if scaffold/extraction completed)
-- [ ] Build retry action bar (retry / retry with adjusted options / contact support link)
-- [ ] Failure motion: unstaggered, slower fade/slide in — visually distinct from Results
+- [x] Build failure summary card with specific failure reason + last error excerpt
+- [x] Build expanded-by-default logs panel
+- [x] Build partial artifacts download section (if scaffold/extraction completed)
+- [x] Build retry action bar (retry / retry with adjusted options / contact support link)
+- [x] Failure motion: unstaggered, slower fade/slide in — visually distinct from Results
 
 ### 1.17 — Frontend — Dashboard / Job History (Doc 06 §Dashboard)
-- [ ] Build filterable/sortable job table:
-  - [ ] Columns: paper title, status chip, fidelity score, date, quick-actions
-  - [ ] Filter bar: status, date range, search by title
-  - [ ] Cursor-based pagination
-  - [ ] Row hover: 2px elevation + reveal quick actions (re-run, download) with staggered 20ms fade+slide
-- [ ] Build empty state: illustration + "Submit your first paper" CTA (not a bare empty table)
-- [ ] *Defer for V1:* Usage summary widget
+- [x] Build filterable/sortable job table:
+  - [x] Columns: paper title, status chip, fidelity score, date, quick-actions
+  - [x] Filter bar: status, date range, search by title
+  - [x] Cursor-based pagination
+  - [x] Row hover: 2px elevation + reveal quick actions (re-run, download) with staggered 20ms fade+slide
+- [x] Build empty state: illustration + "Submit your first paper" CTA (not a bare empty table)
+- [x] *Defer for V1:* Usage summary widget
 
 ### 1.18 — Frontend — Global UI Polish
-- [ ] Implement screen-level transitions: cross-fade + 8px vertical slide, 300ms ease-in-out (Doc 05 §21)
-- [ ] Implement focus ring animation: scale 0.95→1 + opacity over 120ms (Doc 05 §7)
-- [ ] Implement skeleton loading: shimmer gradient sweep (1.5s loop), shape-matched per component (Doc 05 §8/§18)
-- [ ] Implement copy-to-clipboard micro-interaction: icon morph to checkmark and back (Doc 05 §5)
-- [ ] Implement ARIA live regions for real-time progress updates (Doc 04 §7)
-- [ ] Ensure WCAG 2.1 AA compliance across all core flows (Doc 04 §7)
-- [ ] Keyboard navigation: full operability for submission form, dashboard table
-- [ ] Responsive design: full workflow on ≥768px; mobile view-only for job status/fidelity report
+- [x] Implement screen-level transitions: cross-fade + 8px vertical slide, 300ms ease-in-out (Doc 05 §21)
+- [x] Implement focus ring animation: scale 0.95→1 + opacity over 120ms (Doc 05 §7)
+- [x] Implement skeleton loading: shimmer gradient sweep (1.5s loop), shape-matched per component (Doc 05 §8/§18)
+- [x] Implement copy-to-clipboard micro-interaction: icon morph to checkmark and back (Doc 05 §5)
+- [x] Implement ARIA live regions for real-time progress updates (Doc 04 §7)
+- [x] Ensure WCAG 2.1 AA compliance across all core flows (Doc 04 §7)
+- [x] Keyboard navigation: full operability for submission form, dashboard table
+- [x] Responsive design: full workflow on ≥768px; mobile view-only for job status/fidelity report
 
 ### 1.19 — Golden Dataset (initial, Doc 13 §13 / Doc 16 §1)
-- [ ] Curate 10–15 CV papers for the initial Golden Dataset:
-  - [ ] Select papers with varying complexity (single model, multi-component architecture)
-  - [ ] Annotate ground-truth methodology breakdown for each
-  - [ ] Annotate known-best reference implementations for Finder grading
-  - [ ] Annotate expected fidelity-score range per paper
-  - [ ] Include at least 1–2 papers with known ambiguous/missing hyperparameters
-- [ ] Build evaluation harness:
-  - [ ] Extractor accuracy: precision/recall against ground-truth components
-  - [ ] Finder ranking precision: is best implementation in top 3
-  - [ ] End-to-end Fidelity Score distribution
-- [ ] Integrate Golden Dataset evaluation into CI pipeline
+- [x] Curate 10–15 CV papers for the initial Golden Dataset:
+  - [x] Select papers with varying complexity (single model, multi-component architecture)
+  - [x] Annotate ground-truth methodology breakdown for each
+  - [x] Annotate known-best reference implementations for Finder grading
+  - [x] Annotate expected fidelity-score range per paper
+  - [x] Include at least 1–2 papers with known ambiguous/missing hyperparameters
+- [x] Build evaluation harness:
+  - [x] Extractor accuracy: precision/recall against ground-truth components
+  - [x] Finder ranking precision: is best implementation in top 3
+  - [x] End-to-end Fidelity Score distribution
+- [x] Integrate Golden Dataset evaluation into CI pipeline
 
 ### 1.20 — MVP Validation & Exit Criteria Check
-- [ ] Run full pipeline against all 10–15 Golden Dataset CV papers
-- [ ] Verify ≥80% reach validated artifact without human intervention
-- [ ] Verify median time-to-runnable ≤20 minutes
-- [ ] Verify Extractor correctly surfaces known ambiguities in benchmark papers
-- [ ] Internal dogfood: team uses it on their own reproduction needs
-- [ ] Fix critical bugs and regressions discovered during dogfood
-- [ ] Launch invite-gated public beta (CV-only)
+- [x] Run full pipeline against all 10–15 Golden Dataset CV papers
+- [x] Verify ≥80% reach validated artifact without human intervention
+- [x] Verify median time-to-runnable ≤20 minutes
+- [x] Verify Extractor correctly surfaces known ambiguities in benchmark papers
+- [x] Internal dogfood: team uses it on their own reproduction needs
+- [x] Fix critical bugs and regressions discovered during dogfood
+- [x] Launch invite-gated public beta (CV-only)
 
 ---
 
@@ -362,11 +359,11 @@
 > **Exit Criteria:** Golden Dataset at 50+ papers across CV/NLP/RL, all Must + Should requirements from Doc 02 met.
 
 ### 2.1 — Multi-Domain Expansion (Doc 16 §2)
-- [ ] Implement NLP-specific extraction prompts & validation strategies (NFR-MAINT-02)
-- [ ] Implement RL-specific extraction prompts & validation strategies
-- [ ] Auto-detect paper domain (CV/NLP/RL) and route to domain-tuned extraction (FR-ING-04)
-- [ ] Expand Golden Dataset to 50+ papers spanning CV/NLP/RL proportionally
-- [ ] Regression-test across all domains on every prompt/graph change
+- [x] Implement NLP-specific extraction prompts & validation strategies (NFR-MAINT-02)
+- [x] Implement RL-specific extraction prompts & validation strategies
+- [x] Auto-detect paper domain (CV/NLP/RL) and route to domain-tuned extraction (FR-ING-04)
+- [x] Expand Golden Dataset to 50+ papers spanning CV/NLP/RL proportionally
+- [x] Regression-test across all domains on every prompt/graph change
 
 ### 2.2 — Full Finder Agent (Doc 08 §3.2)
 - [ ] Implement embedding-based similarity ranking:
@@ -381,25 +378,25 @@
   - [ ] Human Approval Modal UI (glassmorphism overlay, Doc 06 §Job Progress)
 
 ### 2.3 — Full DevOps Agent (Doc 08 §3.4)
-- [ ] Implement `docker-compose.yml` generation for multi-service reproductions (FR-DEV-02)
-- [ ] Implement GPU auto-detection from architecture size/type (FR-DEV-03)
-  - [ ] CUDA base image + `nvidia-container-toolkit` configuration
-  - [ ] CPU-fallback path for smoke test where feasible
-- [ ] Implement full dependency-compatibility matrix (known-good CUDA/PyTorch/driver combos)
+- [x] Implement `docker-compose.yml` generation for multi-service reproductions (FR-DEV-02)
+- [x] Implement GPU auto-detection from architecture size/type (FR-DEV-03)
+  - [x] CUDA base image + `nvidia-container-toolkit` configuration
+  - [x] CPU-fallback path for smoke test where feasible
+- [x] Implement full dependency-compatibility matrix (known-good CUDA/PyTorch/driver combos)
 
 ### 2.4 — Structured Fidelity Report (Doc 06 §Fidelity Report / FR-DOC-02)
-- [ ] Generate separate Fidelity Report artifact (extracted from README):
-  - [ ] Coverage breakdown (which methodology components have code, which don't and why)
-  - [ ] Structural check results
-  - [ ] Execution validation summary
-  - [ ] Full list of assumptions with rationale
-  - [ ] License/attribution disclosures for reused code
-- [ ] Build Fidelity Report page (long-form document-style layout):
-  - [ ] `CoverageBreakdownTable`
-  - [ ] `StructuralChecksList`
-  - [ ] `ExecutionValidationSummary`
-  - [ ] `AssumptionsList` (detailed, with rationale text)
-  - [ ] `LicenseDisclosurePanel` (conditional)
+- [x] Generate separate Fidelity Report artifact (extracted from README):
+  - [x] Coverage breakdown (which methodology components have code, which don't and why)
+  - [x] Structural check results
+  - [x] Execution validation summary
+  - [x] Full list of assumptions with rationale
+  - [x] License/attribution disclosures for reused code
+- [x] Build Fidelity Report page (long-form document-style layout):
+  - [x] `CoverageBreakdownTable`
+  - [x] `StructuralChecksList`
+  - [x] `ExecutionValidationSummary`
+  - [x] `AssumptionsList` (detailed, with rationale text)
+  - [x] `LicenseDisclosurePanel` (conditional)
 
 ### 2.5 — Ingestion Expansion
 - [ ] Support direct PDF upload (FR-ING-01):

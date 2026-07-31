@@ -1,0 +1,217 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+.header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.successIcon {
+  color: var(--color-status-success);
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  font-size: var(--type-h1-size);
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.card {
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.cardTitle {
+  font-size: var(--type-h3-size);
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.cardContentCentered {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-4);
+}
+
+.cardDesc {
+  font-size: var(--type-caption-size);
+  color: var(--color-text-secondary);
+  max-width: 200px;
+}
+
+.statsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-primary);
+}
+
+.statIcon { color: var(--color-text-secondary); }
+.statIconSuccess {
+  color: var(--color-success);
+}
+
+.fidelityLinkBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-6);
+  padding: var(--spacing-3);
+  background: rgba(124, 108, 240, 0.1);
+  color: var(--color-accent);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: var(--type-ui-sm);
+  transition: all 0.2s ease;
+}
+
+.fidelityLinkBtn:hover {
+  background: rgba(124, 108, 240, 0.2);
+  transform: translateY(-1px);
+}
+
+.statIconPlaceholder {
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+  font-weight: bold;
+}
+
+.statInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.statValue {
+  font-size: var(--type-h3-size);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.statLabel {
+  font-size: var(--type-caption-size);
+  color: var(--color-text-tertiary);
+}
+
+.gapsPanel {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-left: 4px solid var(--color-status-warning);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.gapsHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.warningIcon {
+  color: var(--color-status-warning);
+}
+
+.gapsTitle {
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.gapsList {
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-sm-size);
+}
+
+.gapsList li {
+  margin-bottom: var(--space-1);
+}
+
+.actionBar {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.primaryBtn, .secondaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  flex: 1;
+}
+
+.primaryBtn {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+}
+
+.primaryBtn:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--color-accent-muted);
+}
+
+.secondaryBtn {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-primary);
+}
+
+.secondaryBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-text-tertiary);
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .actionBar {
+    flex-direction: column;
+  }
+}

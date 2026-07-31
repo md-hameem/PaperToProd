@@ -1,0 +1,50 @@
+.authButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--type-body-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  border: 1px solid transparent;
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+/* GitHub Style */
+.github {
+  background-color: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-color: transparent;
+}
+
+.github:hover {
+  background-color: #333333; /* Slightly lighter for hover in light mode, or use CSS vars */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .github:hover {
+  background-color: #2a2a2a;
+}
+
+/* Google Style */
+.google {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-primary);
+}
+
+.google:hover {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}

@@ -94,6 +94,7 @@ class JobState(TypedDict, total=False):
 
     candidate_repos: Annotated[list[CandidateRepo], replace_dict]
     chosen_repo_strategy: str  # "generate_fresh" | "adapt_existing"
+    human_approved_repo_url: str | None
 
     scaffold: Annotated[ScaffoldState, replace_dict]
 

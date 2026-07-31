@@ -4,6 +4,7 @@ See Doc 14 for the full API specification.
 """
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -77,6 +78,28 @@ async def cancel_job(
     """Cancel a running or queued job."""
     job = await service.cancel_job(db=db, job_id=job_id, user_id=MOCK_USER_ID)
     return JobDetailResponse.model_validate(job)
+
+
+class ApproveRequest(BaseModel):
+    repo_url: str
+
+
+@router.post("/{job_id}/approve")
+async def approve_job(
+    job_id: int,
+    payload: ApproveRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Approve a candidate repository and resume LangGraph."""
+    # Verify job exists
+    await service.get_job(db=db, job_id=job_id, user_id=MOCK_USER_ID)
+
+    # Trigger Celery task to resume
+    from app.worker import resume_pipeline
+
+    resume_pipeline.delay(job_id, payload.repo_url)
+
+    return {"status": "resumed", "job_id": job_id, "approved_repo": payload.repo_url}
 
 
 @router.get("/{job_id}/events", response_model=JobEventsListResponse)

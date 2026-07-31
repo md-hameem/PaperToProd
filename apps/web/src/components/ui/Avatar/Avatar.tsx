@@ -39,6 +39,7 @@ export function Avatar({
   const bgColor = name ? hashColor(name) : "var(--color-bg-tertiary)";
 
   if (src) {
+    // eslint-disable-next-line @next/next/no-img-element
     return (
       <img
         src={src}

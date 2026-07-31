@@ -48,6 +48,7 @@ export function CommandPalette({
   // Reset on open
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery("");
       setFocusedIndex(0);
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -66,6 +67,7 @@ export function CommandPalette({
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {

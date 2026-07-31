@@ -11,7 +11,7 @@ from app.pipeline.state import JobState
 from app.websocket.manager import publish_job_event
 
 DOCGEN_PROMPT = """
-You are an expert technical writer. Based on the following state of a machine learning reproduction job, write a comprehensive README.md and a Fidelity Report.
+You are an expert technical writer. Based on the following state of a machine learning reproduction job, write a comprehensive README.md and a structured Fidelity Report.
 
 Paper Title: {paper_title}
 Methodology Extracted:
@@ -23,13 +23,13 @@ Generated Files Overview:
 Validation Status (Fidelity Score: {fidelity_score}):
 {validation_status}
 
-Return a structured JSON with 'readme' (markdown string) and 'fidelity_report' (markdown string).
+For the fidelity report, provide structured JSON matching the requested schema exactly.
 """
 
 
 async def run_docgen(state: JobState) -> dict:
     """LangGraph node for the DocGen Agent."""
-    job_id = state["job_id"]
+    job_id = state.get("job_id", 0)
     await publish_job_event(
         job_id, {"event_type": "agent_transition", "agent_name": "docgen", "status": "started"}
     )
@@ -49,7 +49,73 @@ async def run_docgen(state: JobState) -> dict:
     schema = {
         "title": "Documentation",
         "type": "object",
-        "properties": {"readme": {"type": "string"}, "fidelity_report": {"type": "string"}},
+        "properties": {
+            "readme": {"type": "string"},
+            "fidelity_report": {
+                "type": "object",
+                "properties": {
+                    "coverage": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "component_name": {"type": "string"},
+                                "has_code": {"type": "boolean"},
+                                "reason_if_missing": {"type": "string"},
+                            },
+                            "required": ["component_name", "has_code", "reason_if_missing"],
+                        },
+                    },
+                    "structural_checks": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "check_name": {"type": "string"},
+                                "status": {"type": "string", "enum": ["pass", "fail", "warning"]},
+                                "details": {"type": "string"},
+                            },
+                            "required": ["check_name", "status", "details"],
+                        },
+                    },
+                    "execution": {
+                        "type": "object",
+                        "properties": {
+                            "success": {"type": "boolean"},
+                            "summary": {"type": "string"},
+                        },
+                        "required": ["success", "summary"],
+                    },
+                    "assumptions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "description": {"type": "string"},
+                                "rationale": {"type": "string"},
+                            },
+                            "required": ["description", "rationale"],
+                        },
+                    },
+                    "license": {
+                        "type": "object",
+                        "properties": {
+                            "source_repo_url": {"type": "string"},
+                            "license_type": {"type": "string"},
+                            "disclosure_text": {"type": "string"},
+                        },
+                        "required": ["source_repo_url", "license_type", "disclosure_text"],
+                    },
+                },
+                "required": [
+                    "coverage",
+                    "structural_checks",
+                    "execution",
+                    "assumptions",
+                    "license",
+                ],
+            },
+        },
         "required": ["readme", "fidelity_report"],
     }
 
@@ -74,6 +140,6 @@ async def run_docgen(state: JobState) -> dict:
     return {
         "documentation": {
             "readme": result.get("readme", ""),
-            "fidelity_report": result.get("fidelity_report", ""),
+            "fidelity_report": result.get("fidelity_report", {}),
         }
     }

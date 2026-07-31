@@ -110,7 +110,18 @@ a:hover {
   outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
-  transition: outline-offset var(--duration-instant) var(--ease-out);
+  animation: focus-ring 120ms ease-out forwards;
+}
+
+@keyframes focus-ring {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ══════════════════════════════════════════════════════════

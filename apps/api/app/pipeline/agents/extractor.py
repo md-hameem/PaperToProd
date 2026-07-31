@@ -9,33 +9,76 @@ from app.pipeline.state import JobState
 from app.websocket.manager import publish_job_event
 
 # Prompts
-EXTRACTOR_SYSTEM_PROMPT = """
-You are an expert machine learning researcher. Your task is to extract the methodology from the provided arXiv paper text.
-Focus specifically on architecture, training procedure, datasets, and hyperparameters.
-Return a structured JSON with 'components' (pieces of the methodology) and 'gaps' (missing or inferred details).
+CLASSIFIER_PROMPT = """
+You are an expert machine learning researcher. Analyze the following abstract and classify the paper into one of these domains:
+- "CV" for Computer Vision (e.g., CNNs, ViTs, object detection, image synthesis)
+- "NLP" for Natural Language Processing (e.g., Transformers, LLMs, tokenization, text generation)
+- "RL" for Reinforcement Learning (e.g., policy gradients, Q-learning, environments, agents)
+- "GENERAL" for anything else or interdisciplinary.
+
+Respond with ONLY the exact classification string from the list above.
 """
+
+EXTRACTOR_PROMPTS = {
+    "CV": """You are an expert machine learning researcher. Extract the methodology from the provided Computer Vision arXiv paper.
+Focus specifically on spatial resolutions, convolutions, vision transformers, image augmentations, datasets, and hyperparameters.
+Return a structured JSON with 'components' (pieces of the methodology) and 'gaps' (missing or inferred details).""",
+    "NLP": """You are an expert machine learning researcher. Extract the methodology from the provided Natural Language Processing arXiv paper.
+Focus specifically on tokenizers, vocabulary sizes, attention masking, context windows, text corpora, and hyperparameters.
+Return a structured JSON with 'components' (pieces of the methodology) and 'gaps' (missing or inferred details).""",
+    "RL": """You are an expert machine learning researcher. Extract the methodology from the provided Reinforcement Learning arXiv paper.
+Focus specifically on environment definitions, reward functions, action/observation spaces, discount factors, and hyperparameters.
+Return a structured JSON with 'components' (pieces of the methodology) and 'gaps' (missing or inferred details).""",
+    "GENERAL": """You are an expert machine learning researcher. Extract the methodology from the provided arXiv paper text.
+Focus specifically on architecture, training procedure, datasets, and hyperparameters.
+Return a structured JSON with 'components' (pieces of the methodology) and 'gaps' (missing or inferred details).""",
+}
 
 
 async def run_extractor(state: JobState) -> dict:
     """LangGraph node for the Extractor Agent."""
-    job_id = state["job_id"]
+    job_id = state.get("job_id", 0)
     await publish_job_event(
         job_id, {"event_type": "agent_transition", "agent_name": "extractor", "status": "started"}
     )
 
-    # 1. Fetch paper (simulated text for now, but normally we'd use `arxiv` library)
-    # import arxiv
-    # search = arxiv.Search(id_list=[state["paper"]["arxiv_id"]])
-    # paper = next(search.results())
-    # raw_text = paper.summary # Fallback if pdf extraction is skipped for MVP speed
+    import arxiv
 
-    raw_text = state.get("paper", {}).get(
-        "raw_text", "Sample abstract describing a ResNet-like architecture with AdamW optimizer."
-    )
+    # Real arXiv fetch
+    try:
+        search = arxiv.Search(id_list=[state["paper"]["arxiv_id"]])
+        paper_res = next(search.results())
+        raw_text = paper_res.summary
+    except Exception as e:
+        raw_text = state.get("paper", {}).get(
+            "raw_text", f"Error fetching from arxiv: {e}. Fallback abstract."
+        )
 
     llm = get_llm(temperature=0.1)
 
-    # Define JSON schema for structured output via tool calling (or use Pydantic)
+    # 1. Classify Domain
+    classifier_chain = (
+        ChatPromptTemplate.from_messages(
+            [("system", CLASSIFIER_PROMPT), ("user", "Paper Abstract: {text}")]
+        )
+        | llm
+    )
+
+    classification_result = await classifier_chain.ainvoke({"text": raw_text})
+    domain = classification_result.content.strip().upper()
+    if domain not in EXTRACTOR_PROMPTS:
+        domain = "GENERAL"
+
+    await publish_job_event(
+        job_id,
+        {
+            "event_type": "agent_logs",
+            "agent_name": "extractor",
+            "logs": [f"Classified paper domain as: {domain}"],
+        },
+    )
+
+    # 2. Extract Methodology using domain-specific prompt
     schema = {
         "title": "MethodologyExtraction",
         "type": "object",
@@ -70,11 +113,14 @@ async def run_extractor(state: JobState) -> dict:
     }
 
     structured_llm = llm.with_structured_output(schema)
-    prompt = ChatPromptTemplate.from_messages(
-        [("system", EXTRACTOR_SYSTEM_PROMPT), ("user", "Paper Text: {text}")]
-    )
+    extractor_prompt = EXTRACTOR_PROMPTS[domain]
 
-    chain = prompt | structured_llm
+    chain = (
+        ChatPromptTemplate.from_messages(
+            [("system", extractor_prompt), ("user", "Paper Text: {text}")]
+        )
+        | structured_llm
+    )
 
     result = await chain.ainvoke({"text": raw_text})
 
@@ -84,9 +130,14 @@ async def run_extractor(state: JobState) -> dict:
         "gaps": result.get("gaps", []),
     }
 
+    # We must construct a dict to update the PaperState reducer properly without losing fields
+    # LangGraph replace_dict means we need to supply the full dict or merge carefully
+    paper_state = state.get("paper", {})
+    paper_state["domain_classification"] = domain
+    paper_state["raw_text"] = raw_text
+
     await publish_job_event(
         job_id, {"event_type": "agent_transition", "agent_name": "extractor", "status": "completed"}
     )
 
-    # The returned dict is merged into the global JobState by LangGraph's reducers
-    return {"methodology": methodology}
+    return {"paper": paper_state, "methodology": methodology}

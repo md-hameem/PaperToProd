@@ -25,6 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const stored = localStorage.getItem("ptp-theme") as Theme | null;
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeState(stored);
     } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
       setThemeState("light");

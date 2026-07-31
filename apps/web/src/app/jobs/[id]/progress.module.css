@@ -1,0 +1,45 @@
+.container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+}
+
+.header {
+  margin-bottom: var(--space-8);
+}
+
+.title {
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-sm-size);
+  margin-top: var(--space-1);
+}
+
+.pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: relative;
+}
+
+/* Optional: Vertical connecting line behind the nodes */
+.pipeline::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  left: 35px; /* Aligns with the center of the 24px icons given padding */
+  width: 2px;
+  background: var(--color-border-secondary);
+  z-index: 0;
+}
+
+.contentWrapper {
+  position: relative;
+  min-height: 400px;
+}
