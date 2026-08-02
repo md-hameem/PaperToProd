@@ -280,6 +280,18 @@ async def get_artifact_tree(
                 ],
             },
             {
+                "name": "tests",
+                "type": "directory",
+                "children": [
+                    {
+                        "name": "test_model.py",
+                        "type": "file",
+                        "path": "tests/test_model.py",
+                        "has_annotations": True,
+                    },
+                ],
+            },
+            {
                 "name": "requirements.txt",
                 "type": "file",
                 "path": "requirements.txt",
@@ -338,8 +350,34 @@ async def get_artifact_file(
         content = "print('Training script coming soon...')\n"
         annotations = []
     elif path == "src/utils.py":
-        content = "def helper():\n    pass\n"
+        content = "def set_seed(seed=42):\n    pass\n"
         annotations = []
+    elif path == "tests/test_model.py":
+        content = (
+            "import torch\n"
+            "import pytest\n"
+            "from src.model import VisionTransformer\n\n"
+            "def test_vit_shape():\n"
+            "    model = VisionTransformer(embed_dim=768, num_heads=12)\n"
+            "    x = torch.randn(2, 197, 768)\n"
+            "    out = model(x)\n"
+            "    assert out.shape == (2, 197, 768), f'Expected shape (2, 197, 768), got {out.shape}'\n\n"
+            "def test_vit_smoke():\n"
+            "    model = VisionTransformer()\n"
+            "    # Basic forward pass to ensure no runtime errors\n"
+            "    x = torch.randn(1, 197, 768)\n"
+            "    try:\n"
+            "        model(x)\n"
+            "    except Exception as e:\n"
+            "        pytest.fail(f'Forward pass failed with exception: {e}')\n"
+        )
+        annotations = [
+            {
+                "line": 8,
+                "paper_text": "The standard sequence length is 196 patches plus 1 class token (197), and the embedding dimension is 768 for ViT-Base.",
+                "section": "3.1 Vision Transformer (ViT)",
+            },
+        ]
     elif path == "requirements.txt":
         content = "torch>=2.0.0\nnumpy>=1.24.0\n"
         annotations = []

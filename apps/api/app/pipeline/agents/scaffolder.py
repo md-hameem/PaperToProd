@@ -15,6 +15,8 @@ You are an expert ML engineer. Based on the following methodology components ext
 design a Python project file structure (PyTorch).
 Methodology: {methodology}
 
+CRITICAL: You MUST include a `tests/` directory with comprehensive `pytest` unit test files for each custom component or layer in the file tree.
+
 Return a structured JSON with 'file_tree' (a flat dictionary of filepath -> description) and 'dependency_manifest' (a dictionary of package -> version constraint).
 """
 
@@ -24,6 +26,9 @@ Write the complete, runnable Python code for the following file: {filepath}
 
 File purpose: {file_purpose}
 Overall Methodology Context: {methodology}
+
+If this file is a unit test (e.g. inside `tests/`), ensure you write comprehensive `pytest` assertions.
+Include shape checks for custom ML layers and forward-pass smoke tests for larger components to verify execution without CUDA dependencies if possible.
 
 Return ONLY the raw python code. Do not include markdown code blocks (e.g. ```python) around the response. Start immediately with imports.
 """

@@ -477,10 +477,10 @@
 - [x] Render applied options in Job Results view
 
 ### 2.12 — Unit Test Generation (FR-GEN-04, Should priority)
-- [ ] Scaffolder generates unit tests for individual components:
-  - [ ] Shape checks on custom layers
-  - [ ] Individual component smoke tests
-- [ ] Reviewer runs generated unit tests as part of validation
+- [x] Scaffolder generates unit tests for individual components:
+  - [x] Shape checks on custom layers
+  - [x] Individual component smoke tests
+- [x] Reviewer runs generated unit tests as part of validation
 
 ### 2.13 — Notification System (Doc 09 §Notifications)
 - [ ] Implement job-complete email notification

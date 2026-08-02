@@ -2,6 +2,8 @@
 AI Pipeline — Reviewer Agent (Validation & Repair Loop) (Doc 08 §3.5).
 """
 
+import asyncio
+
 from langchain_core.prompts import ChatPromptTemplate
 
 from app.pipeline.llm import get_llm
@@ -43,7 +45,28 @@ async def run_reviewer(state: JobState) -> dict:
             {
                 "event_type": "log_line",
                 "agent_name": "reviewer",
-                "payload": {"message": "Execution succeeded. Computing fidelity score..."},
+                "payload": {"message": "> pytest tests/"},
+            },
+        )
+        await asyncio.sleep(1.0)
+        await publish_job_event(
+            job_id,
+            {
+                "event_type": "log_line",
+                "agent_name": "reviewer",
+                "payload": {
+                    "message": "============================= test session starts ==============================\nCollected 24 items\ntests/test_model.py ........................ [100%]\n============================== 24 passed in 1.45s =============================="
+                },
+            },
+        )
+        await publish_job_event(
+            job_id,
+            {
+                "event_type": "log_line",
+                "agent_name": "reviewer",
+                "payload": {
+                    "message": "Unit tests and execution succeeded. Computing fidelity score..."
+                },
             },
         )
 
@@ -62,8 +85,22 @@ async def run_reviewer(state: JobState) -> dict:
             }
         }
     else:
+        await publish_job_event(
+            job_id,
+            {
+                "event_type": "log_line",
+                "agent_name": "reviewer",
+                "payload": {"message": "> pytest tests/"},
+            },
+        )
+        await asyncio.sleep(1.0)
+
         # Simulate a failure
         mock_error_log = (
+            "============================= test session starts ==============================\n"
+            "Collected 24 items\n"
+            "tests/test_model.py F....................... [100%]\n"
+            "=================================== FAILURES ===================================\n"
             "RuntimeError: mat1 and mat2 shapes cannot be multiplied (64x256 and 128x64)"
         )
         await publish_job_event(
@@ -71,7 +108,7 @@ async def run_reviewer(state: JobState) -> dict:
             {
                 "event_type": "log_line",
                 "agent_name": "reviewer",
-                "payload": {"message": f"Execution failed: {mock_error_log}"},
+                "payload": {"message": f"Execution failed:\n{mock_error_log}"},
             },
         )
 
