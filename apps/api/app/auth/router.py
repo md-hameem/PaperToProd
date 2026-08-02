@@ -2,12 +2,14 @@
 Auth module — API routes for authentication and OAuth callbacks.
 """
 
+from datetime import UTC
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import security, service
-from app.auth.schemas import AuthCallbackRequest, TokenResponse, UserProfileResponse
+from app.auth.schemas import AuthCallbackRequest, TokenResponse
 from app.database import get_db
 from app.models import User
 
@@ -20,16 +22,46 @@ async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    """Dependency to get the current authenticated user from JWT."""
-    user_id = security.verify_token(token)
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired access token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    """Dependency to get the current authenticated user from JWT or API Key."""
 
-    user = await service.get_user_by_id(db, int(user_id))
+    if token.startswith("ptp_"):
+        import hashlib
+
+        from sqlalchemy import select
+
+        from app.models import ApiKey
+
+        # API Key authentication
+        key_hash = hashlib.sha256(token.encode()).hexdigest()
+        stmt = select(ApiKey).where(ApiKey.key_hash == key_hash)
+        result = await db.execute(stmt)
+        api_key = result.scalar_one_or_none()
+
+        if not api_key:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid API Key",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Update last_used_at (optional optimization: don't await/commit on every request or do it async)
+        from datetime import datetime
+
+        api_key.last_used_at = datetime.now(UTC)
+        await db.commit()
+
+        user = await service.get_user_by_id(db, api_key.user_id)
+    else:
+        # JWT authentication
+        user_id = security.verify_token(token)
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired access token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        user = await service.get_user_by_id(db, int(user_id))
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -68,12 +100,6 @@ async def oauth_callback(
     )
 
     return TokenResponse(access_token=access_token)
-
-
-@router.get("/me", response_model=UserProfileResponse)
-async def get_me(current_user: User = Depends(get_current_user)):
-    """Get the current authenticated user's profile."""
-    return UserProfileResponse.model_validate(current_user)
 
 
 @router.get("/health")

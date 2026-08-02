@@ -13,6 +13,7 @@ from datetime import datetime
 from enum import StrEnum
 
 from sqlalchemy import (
+    JSON,
     DateTime,
     ForeignKey,
     Index,
@@ -57,6 +58,75 @@ class AuthProvider(StrEnum):
     GOOGLE = "google"
 
 
+class WorkspaceRole(StrEnum):
+    """RBAC roles within a workspace."""
+
+    OWNER = "owner"
+    ADMIN = "admin"
+    MEMBER = "member"
+    BILLING = "billing"
+
+
+class SubscriptionTier(StrEnum):
+    """Billing and usage tiers for a workspace."""
+
+    FREE = "free"
+    PRO = "pro"
+    ENTERPRISE = "enterprise"
+
+
+# ── Workspaces ────────────────────────────────────────────────
+
+
+class Workspace(Base):
+    """Organization/Workspace entity."""
+
+    __tablename__ = "workspaces"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    subscription_tier: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=SubscriptionTier.FREE.value
+    )
+    stripe_customer_id: Mapped[str | None] = mapped_column(String(100))
+    stripe_subscription_id: Mapped[str | None] = mapped_column(String(100))
+
+    # GitHub Integration
+    github_installation_id: Mapped[str | None] = mapped_column(String(100))
+    github_account_name: Mapped[str | None] = mapped_column(String(100))
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    members: Mapped[list["WorkspaceMember"]] = relationship(
+        back_populates="workspace", lazy="selectin", cascade="all, delete-orphan"
+    )
+    jobs: Mapped[list["Job"]] = relationship(back_populates="workspace", lazy="selectin")
+
+
+class WorkspaceMember(Base):
+    """Join table mapping Users to Workspaces with roles."""
+
+    __tablename__ = "workspace_members"
+    __table_args__ = (Index("ix_workspace_members_user", "user_id"),)
+
+    workspace_id: Mapped[int] = mapped_column(ForeignKey("workspaces.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    role: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=WorkspaceRole.MEMBER.value
+    )
+
+    joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    workspace: Mapped["Workspace"] = relationship(back_populates="members")
+    user: Mapped["User"] = relationship(back_populates="workspace_memberships")
+
+
 # ── Users ─────────────────────────────────────────────────────
 
 
@@ -79,6 +149,30 @@ class User(Base):
 
     # Relationships
     jobs: Mapped[list["Job"]] = relationship(back_populates="user", lazy="selectin")
+    workspace_memberships: Mapped[list["WorkspaceMember"]] = relationship(
+        back_populates="user", lazy="selectin", cascade="all, delete-orphan"
+    )
+    api_keys: Mapped[list["ApiKey"]] = relationship(
+        back_populates="user", lazy="selectin", cascade="all, delete-orphan"
+    )
+
+
+class ApiKey(Base):
+    """Developer API Keys for dual-auth access."""
+
+    __tablename__ = "api_keys"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    prefix: Mapped[str] = mapped_column(String(20), nullable=False)
+    key_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="api_keys")
 
 
 # ── Jobs ──────────────────────────────────────────────────────
@@ -89,7 +183,7 @@ class Job(Base):
 
     __tablename__ = "jobs"
     __table_args__ = (
-        Index("ix_jobs_user_created", "user_id", "created_at"),
+        Index("ix_jobs_workspace_created", "workspace_id", "created_at"),
         Index("ix_jobs_arxiv_id", "paper_arxiv_id"),
         Index(
             "ix_jobs_active_status",
@@ -100,12 +194,14 @@ class Job(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    workspace_id: Mapped[int] = mapped_column(ForeignKey("workspaces.id"), nullable=False)
 
     # Paper metadata
     paper_source_url: Mapped[str] = mapped_column(String(500), nullable=False)
     paper_arxiv_id: Mapped[str | None] = mapped_column(String(30))
     paper_title: Mapped[str | None] = mapped_column(String(500))
     domain_classification: Mapped[str | None] = mapped_column(String(30))
+    advanced_options: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Status & results
     status: Mapped[str] = mapped_column(String(20), nullable=False, default=JobStatus.QUEUED.value)
@@ -125,6 +221,7 @@ class Job(Base):
 
     # Relationships
     user: Mapped["User"] = relationship(back_populates="jobs")
+    workspace: Mapped["Workspace"] = relationship(back_populates="jobs")
     checkpoints: Mapped[list["JobStateCheckpoint"]] = relationship(
         back_populates="job", lazy="selectin"
     )
@@ -170,7 +267,7 @@ class JobEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    job: Mapped["Job"] = relationship(back_populates="events")
+    job: Mapped["Job"] = relationship(back_populates="job")
 
 
 # ── Job Artifacts ─────────────────────────────────────────────

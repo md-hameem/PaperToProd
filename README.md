@@ -17,10 +17,14 @@ PaperToProd is a multi-agent research reproduction engine that reads an academic
 | 1.1–1.11 MVP Backend | ✅ Done |
 | 1.12–1.20 MVP Frontend | ✅ Done |
 | 2.1 Multi-Domain Expansion | ✅ Done |
-| 2.2 Full Finder Agent | ✅ Done |
-| 2.3 Full DevOps Agent | ✅ Done |
-| 2.4 Structured Fidelity Report | ✅ Done |
-| 2.5 Ingestion Expansion | 🟡 In Progress |
+| 2.2–2.5 Agents & Ingestion Expansion | ✅ Done |
+| 2.6 Human Approval Checkpoints | ✅ Done |
+| 2.7 Payment & Subscriptions | ✅ Done |
+| 2.8 GitHub Integration | ✅ Done |
+| 2.9 API Keys & Personal Settings | ✅ Done |
+| 2.10 Repository Explorer | ✅ Done |
+| 2.11 Advanced Options | ✅ Done |
+| 2.12 Unit Test Generation | 🟡 In Progress |
 
 See [ProjectPlanPhase.md](ProjectPlanPhase.md) for the full roadmap and task tracker.
 

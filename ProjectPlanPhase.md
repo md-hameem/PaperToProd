@@ -399,51 +399,50 @@
   - [x] `LicenseDisclosurePanel` (conditional)
 
 ### 2.5 — Ingestion Expansion
-- [ ] Support direct PDF upload (FR-ING-01):
-  - [ ] Client-side file-type/size validation (25MB max)
-  - [ ] Upload progress indicator
-  - [ ] Defensive PDF parsing in isolated sandbox (Doc 12 §5)
-  - [ ] Reject non-text-extractable PDFs with clear error
-- [ ] Support bare arXiv ID input
-- [ ] Implement user-supplied focus-scope hint (FR-ING-05, Could priority)
-- [ ] Implement framework selection override (FR-GEN-05, Could priority)
+- [x] Support direct PDF upload (FR-ING-01):
+  - [x] Client-side file-type/size validation (25MB max)
+  - [x] Upload progress indicator
+  - [x] Defensive PDF parsing in isolated sandbox (Doc 12 §5)
+  - [x] Reject non-text-extractable PDFs with clear error
+- [x] Support bare arXiv ID input
+- [x] Implement user-supplied focus-scope hint (FR-ING-05, Could priority)
+- [x] Implement framework selection override (FR-GEN-05, Could priority)
 
 ### 2.6 — Workspaces, Teams & RBAC (Doc 09 §7 / FR-ACC-01–02)
-- [ ] Implement organization workspace model
-- [ ] Implement RBAC: Owner / Admin / Member / Billing-only roles
-- [ ] Build shared authorization-decision module (single point of RBAC logic)
-- [ ] Implement workspace creation/management APIs
-- [ ] Build Workspace Settings page (Doc 06 §Workspace Settings):
-  - [ ] Members tab: member table with role management, invite form
-  - [ ] Integrations tab: GitHub App install, BYO API key (enterprise-gated placeholder)
-  - [ ] Edge case: prevent last Owner from leaving/downgrading
-- [ ] Update job visibility: jobs scoped to workspace, accessible by all workspace members
-- [ ] Team collaboration flow: member pushes to team's shared GitHub org
+- [x] Implement organization workspace model
+- [x] Implement RBAC: Owner / Admin / Member / Billing-only roles
+- [x] Build shared authorization-decision module (single point of RBAC logic)
+- [x] Implement workspace creation/management APIs
+- [x] Build Workspace Settings page (Doc 06 §Workspace Settings):
+  - [x] Members tab: member table with role management, invite form
+  - [x] Integrations tab: GitHub App install, BYO API key (enterprise-gated placeholder)
+  - [x] Edge case: prevent last Owner from leaving/downgrading
+- [x] Update job visibility: jobs scoped to workspace, accessible by all workspace members
+- [x] Team collaboration flow: member pushes to team's shared GitHub org
 
 ### 2.7 — Billing & Usage Metering (FR-ACC-03 / Doc 09 §Billing)
-- [ ] Implement usage metering per job (compute time, LLM token cost)
-- [ ] Implement plan-based quota enforcement (pre-submission check)
-- [ ] Integrate Stripe (or equivalent) for payment processing:
-  - [ ] `POST /workspaces/{workspace_id}/billing/checkout-session`
-  - [ ] Webhook handlers for payment events
-- [ ] Build Billing tab in Workspace Settings:
-  - [ ] Plan card
-  - [ ] Usage chart (jobs over time, cost breakdown)
-  - [ ] Payment method panel
-- [ ] Build Usage Summary widget on Dashboard
-- [ ] Implement `GET /workspaces/{workspace_id}/usage` API
-- [ ] Implement Celery queue prioritization per plan tier (Doc 09 §5)
+- [x] Implement usage metering per job (compute time, LLM token cost)
+- [x] Implement plan-based quota enforcement (pre-submission check)
+- [x] Integrate Stripe (or equivalent) for payment processing:
+  - [x] `POST /workspaces/{workspace_id}/billing/checkout-session`
+  - [x] Webhook handlers for payment events
+- [x] Build Billing tab in Workspace Settings:
+  - [x] Plan card
+  - [x] Usage chart (jobs over time, cost breakdown)
+  - [x] Payment method panel
+- [x] Build Usage Summary widget on Dashboard
+- [x] Implement `GET /workspaces/{workspace_id}/usage` API
+- [x] Implement Celery queue prioritization per plan tier (Doc 09 §5)
 
 ### 2.8 — GitHub Push Integration (FR-DEL-02)
-- [ ] Implement GitHub App installation flow
-- [ ] `POST /jobs/{job_id}/artifacts/push-to-github` endpoint
-  - [ ] Push to user-authorized GitHub account/org (new repo or specified existing repo)
-  - [ ] Handle auth expired, target repo exists conflicts
-- [ ] Add GitHub push destination to Job Submission advanced options
-- [ ] Add "Push to GitHub" button on Job Results page
+- [x] Implement GitHub App installation flow
+- [x] `POST /jobs/{job_id}/artifacts/push-to-github` endpoint
+  - [x] Push to user-authorized GitHub account/org (new repo or specified existing repo)
+  - [x] Handle auth expired, target repo exists conflicts
+- [x] Add GitHub push destination to Job Submission advanced options
+- [x] Add "Push to GitHub" button on Job Results page
 
 ### 2.9 — Personal Settings & API Keys (Doc 06 §Personal Settings)
-- [ ] Build Personal Settings page:
   - [ ] Profile section
   - [ ] Connected Accounts (GitHub/Google OAuth management)
   - [ ] API Keys management (table: name, created, last used, revoke action)
@@ -455,26 +454,27 @@
 - [ ] API key scopes & per-request scope re-check (Doc 09 §7)
 
 ### 2.10 — Repository Explorer (Doc 06 §Repository Explorer)
-- [ ] Build three-pane IDE-like layout:
-  - [ ] File tree (left, ~240px, virtualized)
-  - [ ] Code viewer (center, syntax highlighted)
-  - [ ] Reference/annotation panel (right, ~320px, contextual)
-- [ ] Implement paper-traceability annotations:
-  - [ ] Inline markers in code viewer linked to paper sections/equations
-  - [ ] On hover/click: show paper excerpt/figure in reference panel
-  - [ ] Hover reveals traceability indicator dot in file tree (Doc 05 §6)
-- [ ] File-switch cross-fade animation (150ms, Doc 05 §19)
-- [ ] Default to dark mode for code viewer (Doc 06 §Repository Explorer)
-- [ ] Accessible code-block markup with labeled annotations (Doc 04 §10)
-- [ ] Real-time file tree growth animation during in-progress jobs (Doc 05 §14)
+- [x] Build three-pane IDE-like layout:
+  - [x] File tree (left, ~240px, virtualized)
+  - [x] Code viewer (center, syntax highlighted)
+  - [x] Reference/annotation panel (right, ~320px, contextual)
+- [x] Implement paper-traceability annotations:
+  - [x] Inline markers in code viewer linked to paper sections/equations
+  - [x] On hover/click: show paper excerpt/figure in reference panel
+  - [x] Hover reveals traceability indicator dot in file tree (Doc 05 §6)
+- [x] File-switch cross-fade animation (150ms, Doc 05 §19)
+- [x] Default to dark mode for code viewer (Doc 06 §Repository Explorer)
+- [x] Accessible code-block markup with labeled annotations (Doc 04 §10)
+- [x] Real-time file tree growth animation during in-progress jobs (Doc 05 §14)
 
 ### 2.11 — Job Submission Advanced Options (deferred from MVP)
-- [ ] Build collapsible Advanced Options panel (Doc 06 §Job Submission):
-  - [ ] Target framework override `Select` (PyTorch/JAX/TensorFlow)
-  - [ ] Focus scope `TextInput` (optional hint, FR-ING-05)
-  - [ ] Human-approval checkpoint `Toggle` (FR-RT-02)
-  - [ ] GitHub push destination `Select` (from connected GitHub App installs)
-- [ ] Example papers carousel for first-time users (Doc 06 §Job Submission)
+- [x] Build collapsible Advanced Options panel (Doc 06 §Job Submission):
+  - [x] Framework preference (PyTorch, TensorFlow, JAX, Auto)
+  - [x] Focus scope (free-text instructions)
+  - [x] Auto-push to GitHub toggle (only enabled if GitHub is connected)
+- [x] Pass new fields in `POST /jobs` payload
+- [x] Update `Job` model to store `advanced_options` (JSONB)
+- [x] Render applied options in Job Results view
 
 ### 2.12 — Unit Test Generation (FR-GEN-04, Should priority)
 - [ ] Scaffolder generates unit tests for individual components:

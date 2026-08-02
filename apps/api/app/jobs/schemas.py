@@ -17,6 +17,7 @@ class JobCreateRequest(BaseModel):
         description="arXiv URL (e.g. https://arxiv.org/abs/2301.12345)",
         examples=["https://arxiv.org/abs/2301.12345"],
     )
+    advanced_options: dict | None = None
 
 
 # ── Responses ─────────────────────────────────────────────────
@@ -45,6 +46,7 @@ class JobDetailResponse(BaseModel):
     paper_title: str | None
     paper_arxiv_id: str | None
     domain_classification: str | None
+    advanced_options: dict | None
     status: str
     current_agent: str | None
     fidelity_score: float | None

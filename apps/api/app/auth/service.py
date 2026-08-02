@@ -45,8 +45,10 @@ async def process_oauth_callback(
         user.email = mock_email
         user.display_name = mock_display_name
         user.avatar_url = mock_avatar_url
+        await db.commit()
+        await db.refresh(user)
     else:
-        # Create new
+        # Create new user
         user = User(
             email=mock_email,
             display_name=mock_display_name,
@@ -55,9 +57,23 @@ async def process_oauth_callback(
             auth_provider_id=mock_provider_id,
         )
         db.add(user)
+        await db.flush()  # To get user.id
 
-    await db.commit()
-    await db.refresh(user)
+        # Provision a default personal workspace for the new user
+        from app.models import Workspace, WorkspaceMember, WorkspaceRole
+
+        workspace = Workspace(name=f"{user.display_name or 'Personal'} Workspace")
+        db.add(workspace)
+        await db.flush()
+
+        # Add the user as the OWNER of this workspace
+        membership = WorkspaceMember(
+            workspace_id=workspace.id, user_id=user.id, role=WorkspaceRole.OWNER.value
+        )
+        db.add(membership)
+
+        await db.commit()
+        await db.refresh(user)
 
     return user
 

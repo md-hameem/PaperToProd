@@ -1,0 +1,304 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-8);
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.headerIcon {
+  background: var(--color-accent);
+  color: white;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-size: var(--type-h1-size);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-size);
+  margin: var(--space-1) 0 0 0;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border-primary);
+  margin-bottom: var(--space-6);
+  gap: var(--space-6);
+}
+
+.tabBtn {
+  background: none;
+  border: none;
+  padding: var(--space-3) 0;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.tabBtn:hover {
+  color: var(--color-text-primary);
+}
+
+.activeTab {
+  color: var(--color-accent);
+}
+
+.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-accent);
+  border-radius: 2px 2px 0 0;
+}
+
+.card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.cardTitle {
+  font-size: var(--type-h2-size);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.formGroup label {
+  font-size: var(--type-body-sm-size);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.input {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-primary);
+  font-size: var(--type-body-size);
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnPrimary {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: background 0.2s;
+}
+
+.btnPrimary:hover {
+  background: var(--color-accent-hover);
+}
+
+.btnDestructive {
+  background: transparent;
+  color: var(--color-status-error);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: all 0.2s;
+}
+
+.btnDestructive:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-status-error);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.table th {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  font-size: var(--type-body-sm-size);
+}
+
+.table td {
+  color: var(--color-text-primary);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.badge {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--type-body-sm-size);
+  font-family: monospace;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 450px;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modalClose {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modalClose:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.modalContent h2 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--type-h2-size);
+  color: var(--color-text-primary);
+}
+
+.modalContent p {
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-size);
+  margin: 0 0 var(--space-6) 0;
+}
+
+.apiKeyDisplay {
+  background: var(--color-bg-secondary);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-6);
+  border: 1px dashed var(--color-border-hover);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.apiKeyDisplay code {
+  color: var(--color-text-primary);
+  font-size: var(--type-body-size);
+  word-break: break-all;
+}
+
+.warningBox {
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-4);
+  font-size: var(--type-body-sm-size);
+}

@@ -143,6 +143,7 @@ export default function JobProgressPage({ params }: { params: Promise<{ id: stri
                 score={85} // Mock score or derive from jobData.score if available
                 stats={{ loc: 1204, files: 15, tests: 24 }} // Mock stats
                 gaps={['GPU memory constraint assumed 16GB', 'Batch size reduced to 8 for stability']} // Mock gaps
+                advancedOptions={(jobData as any)?.advanced_options}
               />
             </motion.div>
           ) : (

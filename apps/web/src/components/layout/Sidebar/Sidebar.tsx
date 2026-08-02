@@ -9,8 +9,10 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  User,
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
+import { WorkspaceSelector } from "./WorkspaceSelector";
 
 export interface NavItem {
   id: string;
@@ -35,7 +37,8 @@ const defaultItems: NavItem[] = [
   { id: "dashboard", label: "Dashboard", icon: <Home size={20} /> },
   { id: "jobs", label: "Jobs", icon: <FolderKanban size={20} /> },
   { id: "gallery", label: "Gallery", icon: <LayoutGrid size={20} /> },
-  { id: "settings", label: "Settings", icon: <Settings size={20} /> },
+  { id: "settings/workspace", label: "Workspace", icon: <Settings size={20} /> },
+  { id: "settings/profile", label: "Profile", icon: <User size={20} /> },
 ];
 
 export function Sidebar({
@@ -74,6 +77,9 @@ export function Sidebar({
           </div>
         )}
       </div>
+
+      {!collapsed && <WorkspaceSelector />}
+
 
       {/* Nav */}
       <nav className={styles.nav}>

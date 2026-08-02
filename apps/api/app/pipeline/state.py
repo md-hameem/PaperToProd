@@ -89,6 +89,9 @@ class JobState(TypedDict, total=False):
     job_id: int
     user_id: int
 
+    focus_scope: str | None
+    framework_override: str | None
+
     paper: Annotated[PaperState, replace_dict]
     methodology: Annotated[MethodologyState, replace_dict]
 

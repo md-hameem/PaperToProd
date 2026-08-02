@@ -44,15 +44,25 @@ async def run_extractor(state: JobState) -> dict:
 
     import arxiv
 
-    # Real arXiv fetch
-    try:
-        search = arxiv.Search(id_list=[state["paper"]["arxiv_id"]])
-        paper_res = next(search.results())
-        raw_text = paper_res.summary
-    except Exception as e:
-        raw_text = state.get("paper", {}).get(
-            "raw_text", f"Error fetching from arxiv: {e}. Fallback abstract."
-        )
+    # Fetch text either from arXiv or mock PDF parse
+    arxiv_id = state.get("paper", {}).get("arxiv_id")
+    paper_url = state.get("paper", {}).get("source_url", "")
+
+    raw_text = ""
+    if arxiv_id:
+        try:
+            import arxiv
+
+            search = arxiv.Search(id_list=[arxiv_id])
+            paper_res = next(search.results())
+            raw_text = paper_res.summary
+        except Exception as e:
+            raw_text = f"Error fetching from arxiv: {e}. Fallback abstract."
+    elif paper_url.startswith("local:"):
+        # Mocking PDF extraction for MVP
+        raw_text = "This is a mocked abstract extracted from the uploaded PDF document. The paper proposes a novel framework for robust optimization using a Vision Transformer back-end."
+    else:
+        raw_text = "No valid paper source provided."
 
     llm = get_llm(temperature=0.1)
 

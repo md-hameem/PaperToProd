@@ -158,3 +158,208 @@
   color: var(--color-text-primary);
   text-decoration: underline;
 }
+
+/* Drag & Drop Zone */
+.dropzone {
+  width: 100%;
+  border: 2px dashed var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--color-bg-secondary);
+}
+
+.dropzone:hover, .dropzone.dragging {
+  border-color: var(--color-accent);
+  background: rgba(124, 108, 240, 0.05);
+  color: var(--color-text-primary);
+}
+
+.dropIcon {
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-2);
+}
+
+.dropzone:hover .dropIcon, .dropzone.dragging .dropIcon {
+  color: var(--color-accent);
+}
+
+.dropLimit {
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-tertiary);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+/* File Selected */
+.fileSelected {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.fileIcon {
+  color: var(--color-status-success);
+}
+
+.fileName {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  text-align: left;
+}
+
+.fileSize {
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-secondary);
+  text-align: left;
+}
+
+.clearFileBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
+}
+
+.clearFileBtn:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-status-error);
+}
+
+/* Divider */
+.orDivider {
+  width: 100%;
+  text-align: center;
+  position: relative;
+  margin: var(--space-4) 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--type-body-sm-size);
+  font-weight: 600;
+}
+
+.orDivider::before, .orDivider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 42%;
+  height: 1px;
+  background: var(--color-border-primary);
+}
+
+.orDivider::before { left: 0; }
+.orDivider::after { right: 0; }
+
+/* Advanced Toggle */
+.advancedToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-4);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  border-top: 1px solid var(--color-border-primary);
+  margin-top: var(--space-4);
+}
+
+.advancedToggle:hover {
+  color: var(--color-text-primary);
+}
+
+.advancedPanel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  overflow: hidden;
+}
+
+.advancedField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  text-align: left;
+}
+
+.advancedField label {
+  font-size: var(--type-body-sm-size);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.advancedField textarea, .advancedField select {
+  width: 100%;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--type-body-size);
+  resize: vertical;
+}
+
+.advancedField textarea:focus, .advancedField select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.advancedFieldCheckbox {
+  margin-top: var(--space-3);
+}
+
+.advancedFieldCheckbox label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.advancedFieldCheckbox input[type="checkbox"] {
+  accent-color: var(--color-accent);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.usageWidget {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+}
+
+.usageWidgetText {
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}

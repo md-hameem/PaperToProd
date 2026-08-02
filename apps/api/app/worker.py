@@ -21,6 +21,9 @@ celery_app.conf.update(
     enable_utc=True,
     # Worker concurrency config (e.g. 4 processes)
     worker_concurrency=4,
+    # Queue priorities
+    task_default_queue="celery",
+    task_create_missing_queues=True,
 )
 
 
@@ -39,11 +42,23 @@ async def _run_pipeline_async(job_id: int, initial_state: dict):
 
 
 @celery_app.task(name="run_pipeline", bind=True, max_retries=3)
-def run_pipeline(self, job_id: int, paper_url: str, arxiv_id: str):
+def run_pipeline(
+    self,
+    job_id: int,
+    paper_url: str,
+    arxiv_id: str | None = None,
+    focus_scope: str | None = None,
+    framework_override: str | None = None,
+):
     """
     Celery task that initializes and runs the LangGraph AI pipeline.
     """
-    initial_state = {"job_id": job_id, "paper": {"source_url": paper_url, "arxiv_id": arxiv_id}}
+    initial_state = {
+        "job_id": job_id,
+        "paper": {"source_url": paper_url, "arxiv_id": arxiv_id},
+        "focus_scope": focus_scope,
+        "framework_override": framework_override,
+    }
 
     # We must run the async graph inside the sync celery task
     try:

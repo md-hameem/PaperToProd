@@ -26,6 +26,26 @@
 
 .subtitle {
   color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.advancedOptionsPill {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+
+.optionBadge {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-full);
+  padding: 2px var(--space-3);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .grid {
@@ -203,8 +223,102 @@
 }
 
 .secondaryBtn:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-hover);
+}
+
+/* GitHub Push Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 450px;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modalClose {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modalClose:hover {
   background: var(--color-bg-secondary);
-  border-color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
+}
+
+.modalContent h2 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--type-h2-size);
+  color: var(--color-text-primary);
+}
+
+.modalContent p {
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-size);
+  margin: 0 0 var(--space-6) 0;
+}
+
+.githubForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.formGroup label {
+  font-size: var(--type-body-sm-size);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.formGroup input {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-primary);
+  font-size: var(--type-body-size);
+  transition: all 0.2s ease;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(124, 108, 240, 0.2);
 }
 
 @media (max-width: 768px) {

@@ -1,0 +1,276 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  background-color: var(--color-bg-primary);
+  overflow: hidden;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.explorerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border-primary);
+  background: var(--color-bg-primary);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.jobTitle {
+  font-size: var(--type-h3-size);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.jobBadge {
+  background: var(--color-accent);
+  color: white;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* File Tree Pane */
+.sidebar {
+  width: 260px;
+  min-width: 200px;
+  background: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarHeader {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--type-body-sm-size);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.fileTree {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-2) 0;
+}
+
+.treeNode {
+  display: flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-4);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-sm-size);
+  transition: all 0.2s;
+  position: relative;
+  user-select: none;
+}
+
+.treeNode:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.treeNode.active {
+  background: rgba(124, 108, 240, 0.1);
+  color: var(--color-accent);
+}
+
+.treeIcon {
+  margin-right: var(--space-2);
+  display: flex;
+  align-items: center;
+}
+
+.annotationDot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-accent);
+  border-radius: 50%;
+  position: absolute;
+  right: var(--space-4);
+}
+
+/* Editor Pane */
+.editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #0d1117; /* GitHub Dark-ish */
+  position: relative;
+  overflow: hidden;
+}
+
+.editorHeader {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  color: #c9d1d9;
+  font-size: var(--type-body-sm-size);
+}
+
+.editorContent {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-4);
+  position: relative;
+}
+
+.codeArea {
+  margin: 0;
+  padding: 0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #c9d1d9;
+  tab-size: 4;
+}
+
+.codeLine {
+  display: flex;
+  padding: 0 var(--space-2);
+}
+
+.lineNumber {
+  width: 40px;
+  color: #484f58;
+  text-align: right;
+  padding-right: var(--space-4);
+  user-select: none;
+}
+
+.lineContent {
+  white-space: pre;
+  flex: 1;
+}
+
+.annotatedLine {
+  background: rgba(124, 108, 240, 0.15);
+  cursor: pointer;
+  position: relative;
+}
+
+.annotatedLine:hover {
+  background: rgba(124, 108, 240, 0.25);
+}
+
+.annotatedLine::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-accent);
+}
+
+.activeAnnotation {
+  background: rgba(124, 108, 240, 0.3) !important;
+}
+
+/* Annotations Panel */
+.panel {
+  width: 320px;
+  min-width: 250px;
+  background: var(--color-bg-primary);
+  border-left: 1px solid var(--color-border-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.panelHeader {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--type-body-sm-size);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.panelContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.emptyPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.annotationCard {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.annotationSection {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-2);
+}
+
+.annotationText {
+  font-size: var(--type-body-sm-size);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
+  border-left: 3px solid var(--color-border-hover);
+  padding-left: var(--space-3);
+}

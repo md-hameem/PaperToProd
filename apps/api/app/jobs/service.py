@@ -32,48 +32,80 @@ def extract_arxiv_id(url: str) -> str | None:
 async def create_job(
     db: AsyncSession,
     user_id: int,
+    workspace_id: int,
     paper_url: str,
+    advanced_options: dict | None = None,
 ) -> Job:
     """Create a new reproduction job after validation."""
-    # Validate URL format
+    # Extract arXiv ID if possible (for duplicates and metadata)
     arxiv_id = extract_arxiv_id(paper_url)
-    if not arxiv_id:
-        raise HTTPException(
-            status_code=422,
-            detail="Invalid paper URL. Please provide a valid arXiv URL "
-            "(e.g. https://arxiv.org/abs/2301.12345).",
-        )
 
-    # Check for duplicate submissions
-    existing = await db.execute(
-        select(Job).where(
-            Job.user_id == user_id,
-            Job.paper_arxiv_id == arxiv_id,
-            Job.status.in_(
-                [JobStatus.QUEUED.value, JobStatus.RUNNING.value, JobStatus.COMPLETED.value]
-            ),
+    # Check for duplicate submissions if we have an arXiv ID
+    if arxiv_id:
+        existing = await db.execute(
+            select(Job).where(
+                Job.workspace_id == workspace_id,
+                Job.paper_arxiv_id == arxiv_id,
+                Job.status.in_(
+                    [JobStatus.QUEUED.value, JobStatus.RUNNING.value, JobStatus.COMPLETED.value]
+                ),
+            )
         )
-    )
-    existing_job = existing.scalars().first()
-    if existing_job:
-        raise HTTPException(
-            status_code=409,
-            detail={
-                "message": "A job for this paper already exists.",
-                "existing_job_id": existing_job.id,
-                "existing_status": existing_job.status,
-            },
-        )
+        existing_job = existing.scalars().first()
+        if existing_job:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "message": "A job for this paper already exists in this workspace.",
+                    "existing_job_id": existing_job.id,
+                    "existing_status": existing_job.status,
+                },
+            )
+
+    # Fetch workspace to check tier and quota
+    from sqlalchemy import func
+
+    from app.models import SubscriptionTier, Workspace
+
+    ws_result = await db.execute(select(Workspace).where(Workspace.id == workspace_id))
+    workspace = ws_result.scalar_one_or_none()
+
+    if not workspace:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+
+    if workspace.subscription_tier == SubscriptionTier.FREE.value:
+        # Check quota (e.g. limit to 3 jobs for FREE tier)
+        count_stmt = select(func.count(Job.id)).where(Job.workspace_id == workspace_id)
+        count_result = await db.execute(count_stmt)
+        total_jobs = count_result.scalar() or 0
+
+        if total_jobs >= 3:
+            raise HTTPException(
+                status_code=403,
+                detail="Free tier limit reached (3 jobs max). Please upgrade to Pro to continue.",
+            )
 
     # Create the job
     job = Job(
         user_id=user_id,
+        workspace_id=workspace_id,
         paper_source_url=paper_url,
         paper_arxiv_id=arxiv_id,
         status=JobStatus.QUEUED.value,
+        advanced_options=advanced_options,
     )
     db.add(job)
     await db.flush()
+
+    payload = {
+        "paper_url": paper_url,
+        "arxiv_id": arxiv_id,
+    }
+    if advanced_options:
+        if advanced_options.get("focus_scope"):
+            payload["focus_scope"] = advanced_options["focus_scope"]
+        if advanced_options.get("framework_override"):
+            payload["framework_override"] = advanced_options["framework_override"]
 
     # Create initial event
     event = JobEvent(
@@ -81,7 +113,7 @@ async def create_job(
         sequence=1,
         agent_name=None,
         event_type="job_created",
-        payload={"paper_url": paper_url, "arxiv_id": arxiv_id},
+        payload=payload,
     )
     db.add(event)
     await db.commit()
@@ -89,14 +121,27 @@ async def create_job(
 
     from app.worker import run_pipeline
 
-    run_pipeline.delay(job.id, paper_url, arxiv_id)
+    # Route PRO/ENTERPRISE to high_priority queue
+    queue_name = "celery"
+    if workspace.subscription_tier in (
+        SubscriptionTier.PRO.value,
+        SubscriptionTier.ENTERPRISE.value,
+    ):
+        queue_name = "high_priority"
+
+    # Pass the payload directly to the pipeline worker
+    f_scope = advanced_options.get("focus_scope") if advanced_options else None
+    f_override = advanced_options.get("framework_override") if advanced_options else None
+    run_pipeline.apply_async(
+        args=[job.id, paper_url, arxiv_id, f_scope, f_override], queue=queue_name
+    )
 
     return job
 
 
-async def get_job(db: AsyncSession, job_id: int, user_id: int) -> Job:
-    """Get a single job by ID, scoped to the current user."""
-    result = await db.execute(select(Job).where(Job.id == job_id, Job.user_id == user_id))
+async def get_job(db: AsyncSession, job_id: int, workspace_id: int) -> Job:
+    """Get a single job by ID, scoped to the workspace."""
+    result = await db.execute(select(Job).where(Job.id == job_id, Job.workspace_id == workspace_id))
     job = result.scalars().first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found.")
@@ -105,14 +150,14 @@ async def get_job(db: AsyncSession, job_id: int, user_id: int) -> Job:
 
 async def list_jobs(
     db: AsyncSession,
-    user_id: int,
+    workspace_id: int,
     cursor: str | None = None,
     limit: int = 20,
 ) -> tuple[list[Job], str | None]:
-    """List jobs for a user with cursor-based pagination."""
+    """List jobs for a workspace with cursor-based pagination."""
     query = (
         select(Job)
-        .where(Job.user_id == user_id)
+        .where(Job.workspace_id == workspace_id)
         .order_by(Job.created_at.desc())
         .limit(limit + 1)  # fetch one extra to detect has_more
     )
@@ -134,9 +179,9 @@ async def list_jobs(
     return jobs, next_cursor
 
 
-async def cancel_job(db: AsyncSession, job_id: int, user_id: int) -> Job:
+async def cancel_job(db: AsyncSession, job_id: int, workspace_id: int) -> Job:
     """Cancel a running or queued job."""
-    job = await get_job(db, job_id, user_id)
+    job = await get_job(db, job_id, workspace_id)
 
     if job.status not in (JobStatus.QUEUED.value, JobStatus.RUNNING.value):
         raise HTTPException(
@@ -167,12 +212,12 @@ async def cancel_job(db: AsyncSession, job_id: int, user_id: int) -> Job:
 async def get_job_events(
     db: AsyncSession,
     job_id: int,
-    user_id: int,
+    workspace_id: int,
     since_sequence: int = 0,
 ) -> list[JobEvent]:
     """Get events for a job since a given sequence number (for reconnection replay)."""
     # Verify ownership
-    await get_job(db, job_id, user_id)
+    await get_job(db, job_id, workspace_id)
 
     result = await db.execute(
         select(JobEvent)

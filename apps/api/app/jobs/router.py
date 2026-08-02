@@ -3,15 +3,20 @@ Jobs module — API routes for job lifecycle (create, list, get, cancel, events,
 See Doc 14 for the full API specification.
 """
 
-from fastapi import APIRouter, Depends, Query
+import os
+import shutil
+
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.rbac import require_workspace_role
+from app.auth.router import get_current_user
 from app.database import get_db
 from app.jobs import service
 from app.jobs.schemas import (
     ArtifactDownloadResponse,
-    JobCreateRequest,
     JobCreateResponse,
     JobDetailResponse,
     JobEventResponse,
@@ -19,24 +24,60 @@ from app.jobs.schemas import (
     JobListResponse,
     JobSummaryResponse,
 )
+from app.models import User, WorkspaceMember, WorkspaceRole
 
 router = APIRouter()
-
-# TODO: Replace with real auth dependency that extracts user_id from JWT
-MOCK_USER_ID = 1
 
 
 @router.post("", response_model=JobCreateResponse, status_code=201)
 async def create_job(
-    request: JobCreateRequest,
+    file: UploadFile | None = File(None),
+    arxiv_url: str | None = Form(None),
+    arxiv_id: str | None = Form(None),
+    focus_scope: str | None = Form(None),
+    framework_override: str | None = Form(None),
+    github_auto_push: bool = Form(False),
+    x_workspace_id: int = Header(...),
+    current_user: User = Depends(get_current_user),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
     db: AsyncSession = Depends(get_db),
 ):
     """Create a new paper reproduction job."""
+    if not file and not arxiv_url and not arxiv_id:
+        raise HTTPException(
+            status_code=422,
+            detail="Must provide either a PDF file, an arxiv_url, or an arxiv_id.",
+        )
+
+    # Use arXiv URL or ID if provided
+    paper_url = arxiv_url or arxiv_id or ""
+    if file and file.filename:
+        paper_url = file.filename
+
     job = await service.create_job(
         db=db,
-        user_id=MOCK_USER_ID,
-        paper_url=request.paper_url,
+        user_id=current_user.id,
+        workspace_id=x_workspace_id,
+        paper_url=paper_url,
+        advanced_options={
+            "focus_scope": focus_scope,
+            "framework_override": framework_override,
+            "github_auto_push": github_auto_push,
+        },
     )
+
+    if file:
+        # Save file to local storage (stub for MinIO/S3)
+        storage_dir = f"storage/jobs/{job.id}"
+        os.makedirs(storage_dir, exist_ok=True)
+        file_path = f"{storage_dir}/{file.filename}"
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # Update job paper source URL to the local path
+        job.paper_source_url = f"local:{file_path}"
+        await db.commit()
+
     return JobCreateResponse(id=job.id, status=job.status)
 
 
@@ -44,12 +85,14 @@ async def create_job(
 async def list_jobs(
     cursor: str | None = Query(None, description="Pagination cursor (ISO datetime)"),
     limit: int = Query(20, ge=1, le=100),
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
     db: AsyncSession = Depends(get_db),
 ):
-    """List jobs for the current user with cursor-based pagination."""
+    """List jobs for the current workspace with cursor-based pagination."""
     jobs, next_cursor = await service.list_jobs(
         db=db,
-        user_id=MOCK_USER_ID,
+        workspace_id=x_workspace_id,
         cursor=cursor,
         limit=limit,
     )
@@ -63,20 +106,24 @@ async def list_jobs(
 @router.get("/{job_id}", response_model=JobDetailResponse)
 async def get_job(
     job_id: int,
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
     db: AsyncSession = Depends(get_db),
 ):
     """Get full job state snapshot."""
-    job = await service.get_job(db=db, job_id=job_id, user_id=MOCK_USER_ID)
+    job = await service.get_job(db=db, job_id=job_id, workspace_id=x_workspace_id)
     return JobDetailResponse.model_validate(job)
 
 
 @router.post("/{job_id}/cancel", response_model=JobDetailResponse)
 async def cancel_job(
     job_id: int,
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
     db: AsyncSession = Depends(get_db),
 ):
     """Cancel a running or queued job."""
-    job = await service.cancel_job(db=db, job_id=job_id, user_id=MOCK_USER_ID)
+    job = await service.cancel_job(db=db, job_id=job_id, workspace_id=x_workspace_id)
     return JobDetailResponse.model_validate(job)
 
 
@@ -88,11 +135,13 @@ class ApproveRequest(BaseModel):
 async def approve_job(
     job_id: int,
     payload: ApproveRequest,
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
     db: AsyncSession = Depends(get_db),
 ):
     """Approve a candidate repository and resume LangGraph."""
     # Verify job exists
-    await service.get_job(db=db, job_id=job_id, user_id=MOCK_USER_ID)
+    await service.get_job(db=db, job_id=job_id, workspace_id=x_workspace_id)
 
     # Trigger Celery task to resume
     from app.worker import resume_pipeline
@@ -106,13 +155,15 @@ async def approve_job(
 async def get_job_events(
     job_id: int,
     since_sequence: int = Query(0, ge=0, description="Return events after this sequence number"),
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
     db: AsyncSession = Depends(get_db),
 ):
     """Get job events for reconnection replay."""
     events = await service.get_job_events(
         db=db,
         job_id=job_id,
-        user_id=MOCK_USER_ID,
+        workspace_id=x_workspace_id,
         since_sequence=since_sequence,
     )
     return JobEventsListResponse(
@@ -121,14 +172,60 @@ async def get_job_events(
     )
 
 
+class PushToGithubRequest(BaseModel):
+    repository_name: str
+
+
+@router.post("/{job_id}/artifacts/push-to-github")
+async def push_to_github(
+    job_id: int,
+    payload: PushToGithubRequest,
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(
+        require_workspace_role([WorkspaceRole.OWNER, WorkspaceRole.ADMIN, WorkspaceRole.MEMBER])
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Mock endpoint to push artifacts to GitHub.
+    Verifies workspace integration and simulates a push.
+    """
+    # 1. Verify job belongs to workspace
+    job = await service.get_job(db, job_id, x_workspace_id)
+    if job.status != "completed":
+        raise HTTPException(status_code=400, detail="Can only push completed jobs")
+
+    # 2. Verify workspace has GitHub integrated
+    from app.models import Workspace
+
+    ws_result = await db.execute(select(Workspace).where(Workspace.id == x_workspace_id))
+    ws = ws_result.scalar_one_or_none()
+
+    if not ws or not ws.github_installation_id:
+        raise HTTPException(status_code=400, detail="GitHub is not integrated for this workspace")
+
+    # 3. Simulate Push
+    import asyncio
+
+    await asyncio.sleep(2)  # Simulate work
+
+    return {
+        "status": "success",
+        "repository_url": f"https://github.com/{ws.github_account_name}/{payload.repository_name}",
+        "message": f"Successfully pushed to {ws.github_account_name}/{payload.repository_name}",
+    }
+
+
 @router.get("/{job_id}/artifacts/repository", response_model=ArtifactDownloadResponse)
 async def get_repository_download(
     job_id: int,
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
     db: AsyncSession = Depends(get_db),
 ):
     """Get a signed download URL for the generated repository archive."""
-    # Verify job exists and is owned by user
-    job = await service.get_job(db=db, job_id=job_id, user_id=MOCK_USER_ID)
+    # Verify job exists and is owned by workspace
+    job = await service.get_job(db=db, job_id=job_id, workspace_id=x_workspace_id)
 
     # TODO: Generate signed MinIO URL
     return ArtifactDownloadResponse(
@@ -142,3 +239,114 @@ async def get_repository_download(
 @router.get("/health")
 async def jobs_health():
     return {"status": "ok", "module": "jobs"}
+
+
+@router.get("/{job_id}/artifacts/tree")
+async def get_artifact_tree(
+    job_id: int,
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return a mock file tree of the generated repository."""
+    await service.get_job(db=db, job_id=job_id, workspace_id=x_workspace_id)
+
+    return {
+        "name": "repository",
+        "type": "directory",
+        "children": [
+            {
+                "name": "src",
+                "type": "directory",
+                "children": [
+                    {
+                        "name": "model.py",
+                        "type": "file",
+                        "path": "src/model.py",
+                        "has_annotations": True,
+                    },
+                    {
+                        "name": "train.py",
+                        "type": "file",
+                        "path": "src/train.py",
+                        "has_annotations": False,
+                    },
+                    {
+                        "name": "utils.py",
+                        "type": "file",
+                        "path": "src/utils.py",
+                        "has_annotations": False,
+                    },
+                ],
+            },
+            {
+                "name": "requirements.txt",
+                "type": "file",
+                "path": "requirements.txt",
+                "has_annotations": False,
+            },
+            {"name": "README.md", "type": "file", "path": "README.md", "has_annotations": False},
+        ],
+    }
+
+
+@router.get("/{job_id}/artifacts/file")
+async def get_artifact_file(
+    job_id: int,
+    path: str,
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return mock content and annotations for a specific file."""
+    await service.get_job(db=db, job_id=job_id, workspace_id=x_workspace_id)
+
+    if path == "src/model.py":
+        content = (
+            "import torch\n"
+            "import torch.nn as nn\n\n"
+            "class VisionTransformer(nn.Module):\n"
+            "    def __init__(self, embed_dim=768, num_heads=12):\n"
+            "        super().__init__()\n"
+            "        # Layer normalization before the self-attention block\n"
+            "        self.norm1 = nn.LayerNorm(embed_dim)\n"
+            "        self.attn = nn.MultiheadAttention(embed_dim, num_heads)\n"
+            "        self.norm2 = nn.LayerNorm(embed_dim)\n"
+            "        self.mlp = nn.Sequential(\n"
+            "            nn.Linear(embed_dim, embed_dim * 4),\n"
+            "            nn.GELU(),\n"
+            "            nn.Linear(embed_dim * 4, embed_dim)\n"
+            "        )\n\n"
+            "    def forward(self, x):\n"
+            "        x = x + self.attn(self.norm1(x))[0]\n"
+            "        x = x + self.mlp(self.norm2(x))\n"
+            "        return x\n"
+        )
+        annotations = [
+            {
+                "line": 6,
+                "paper_text": "We apply Layer Normalization (LN) before every block, and residual connections after every block (Wang et al., 2019; Ba et al., 2016).",
+                "section": "3.1 Vision Transformer (ViT)",
+            },
+            {
+                "line": 15,
+                "paper_text": "The MLP contains two layers with a GELU non-linearity.",
+                "section": "3.1 Vision Transformer (ViT)",
+            },
+        ]
+    elif path == "src/train.py":
+        content = "print('Training script coming soon...')\n"
+        annotations = []
+    elif path == "src/utils.py":
+        content = "def helper():\n    pass\n"
+        annotations = []
+    elif path == "requirements.txt":
+        content = "torch>=2.0.0\nnumpy>=1.24.0\n"
+        annotations = []
+    elif path == "README.md":
+        content = "# Generated Project\n\nThis project was generated by PaperToProd.\n"
+        annotations = []
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return {"content": content, "annotations": annotations}
