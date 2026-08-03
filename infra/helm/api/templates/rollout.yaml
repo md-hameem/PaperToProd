@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: papertoprod-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount | default 2 }}
+  strategy:
+    blueGreen:
+      activeService: papertoprod-api-active
+      previewService: papertoprod-api-preview
+      autoPromotionEnabled: false
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: papertoprod-api
+  template:
+    metadata:
+      labels:
+        app: papertoprod-api
+    spec:
+      containers:
+      - name: api
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DEPLOYMENT_VERSION
+          value: "{{ .Values.image.tag }}"
+        resources:
+{{ toYaml .Values.resources | indent 10 }}

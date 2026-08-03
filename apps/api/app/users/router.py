@@ -17,6 +17,7 @@ router = APIRouter(prefix="/users/me", tags=["Users"])
 class UserProfileUpdate(BaseModel):
     display_name: str | None = None
     email: str | None = None
+    notification_preferences: dict | None = None
 
 
 class ApiKeyCreate(BaseModel):
@@ -43,6 +44,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
         "email": current_user.email,
         "display_name": current_user.display_name,
         "avatar_url": current_user.avatar_url,
+        "notification_preferences": current_user.notification_preferences,
     }
 
 
@@ -57,6 +59,8 @@ async def update_me(
         current_user.display_name = payload.display_name
     if payload.email is not None:
         current_user.email = payload.email
+    if payload.notification_preferences is not None:
+        current_user.notification_preferences = payload.notification_preferences
 
     await db.commit()
     return {
@@ -64,6 +68,7 @@ async def update_me(
         "email": current_user.email,
         "display_name": current_user.display_name,
         "avatar_url": current_user.avatar_url,
+        "notification_preferences": current_user.notification_preferences,
     }
 
 

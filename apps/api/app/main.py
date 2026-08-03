@@ -6,11 +6,44 @@ Modules: auth, jobs, billing, integrations, gallery, notifications, websocket.
 """
 
 import contextlib
+import os
+import uuid
 
-from fastapi import FastAPI
+import structlog
+from fastapi import FastAPI, Request, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
 from app.config import settings
+
+# Initialize OpenTelemetry
+resource = Resource(
+    attributes={
+        SERVICE_NAME: "papertoprod-api",
+        SERVICE_VERSION: os.environ.get("DEPLOYMENT_VERSION", "unknown"),
+    }
+)
+provider = TracerProvider(resource=resource)
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+
+# Configure Structlog
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.JSONRenderer(),
+    ],
+    wrapper_class=structlog.make_filtering_bound_logger(20),
+    context_class=dict,
+    logger_factory=structlog.PrintLoggerFactory(),
+)
 
 
 @contextlib.asynccontextmanager
@@ -35,6 +68,24 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    @app.middleware("http")
+    async def structlog_middleware(request: Request, call_next):
+        request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        structlog.contextvars.clear_contextvars()
+        structlog.contextvars.bind_contextvars(request_id=request_id)
+
+        # Inject request_id into OpenTelemetry current span
+        current_span = trace.get_current_span()
+        if current_span.is_recording():
+            current_span.set_attribute("request_id", request_id)
+
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        return response
+
+    # Instrument FastAPI with OpenTelemetry
+    FastAPIInstrumentor.instrument_app(app)
+
     # CORS
     app.add_middleware(
         CORSMiddleware,
@@ -52,23 +103,31 @@ def create_app() -> FastAPI:
 
 def _register_routers(app: FastAPI) -> None:
     """Register all module routers under /api/v1."""
+    from app.auth.api_keys import router as api_keys_router
     from app.auth.router import router as auth_router
     from app.billing.router import router as billing_router
     from app.integrations.router import router as integrations_router
     from app.jobs.router import router as jobs_router
+    from app.notifications.router import router as notifications_router
     from app.users.router import router as users_router
+    from app.webhooks.router import router as webhooks_router
     from app.websocket.router import router as websocket_router
     from app.workspaces.router import router as workspaces_router
 
-    app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
-    app.include_router(jobs_router, prefix="/api/v1/jobs", tags=["Jobs"])
-    app.include_router(workspaces_router, prefix="/api/v1/workspaces", tags=["Workspaces"])
-    app.include_router(billing_router, prefix="/api/v1", tags=["Billing"])
-    app.include_router(integrations_router, prefix="/api/v1", tags=["Integrations"])
-    app.include_router(users_router, prefix="/api/v1", tags=["Users"])
-    app.include_router(websocket_router, tags=["WebSockets"])
+    api_v1 = APIRouter(prefix="/api/v1")
 
-    # Future: integrations, gallery, notifications routers
+    api_v1.include_router(auth_router, prefix="/auth", tags=["Auth"])
+    api_v1.include_router(api_keys_router, prefix="/auth", tags=["API Keys"])
+    api_v1.include_router(jobs_router, prefix="/jobs", tags=["Jobs"])
+    api_v1.include_router(workspaces_router, prefix="/workspaces", tags=["Workspaces"])
+    api_v1.include_router(billing_router, tags=["Billing"])
+    api_v1.include_router(integrations_router, tags=["Integrations"])
+    api_v1.include_router(users_router, tags=["Users"])
+    api_v1.include_router(notifications_router, tags=["Notifications"])
+    api_v1.include_router(webhooks_router, tags=["Webhooks"])
+
+    app.include_router(api_v1)
+    app.include_router(websocket_router, tags=["WebSockets"])
 
 
 app = create_app()

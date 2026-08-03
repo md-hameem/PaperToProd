@@ -284,3 +284,84 @@ export async function removeWorkspaceMember(workspaceId: string, targetUserId: s
   }
   return true;
 }
+
+// ── Notifications ───────────────────────────────────────────
+
+export async function getNotifications() {
+  const response = await apiFetch('/notifications');
+  if (!response.ok) throw new Error('Failed to fetch notifications');
+  return response.json();
+}
+
+export async function markNotificationRead(id: number) {
+  const response = await apiFetch(`/notifications/${id}/read`, {
+    method: 'PUT'
+  });
+  if (!response.ok) throw new Error('Failed to mark notification as read');
+  return response.json();
+}
+
+// ── Webhooks ────────────────────────────────────────────────
+
+export async function getWebhooks(workspaceId: string) {
+  const response = await apiFetch(`/workspaces/${workspaceId}/webhooks`);
+  if (!response.ok) throw new Error('Failed to fetch webhooks');
+  return response.json();
+}
+
+export async function createWebhook(workspaceId: string, url: string) {
+  const response = await apiFetch(`/workspaces/${workspaceId}/webhooks`, {
+    method: 'POST',
+    body: JSON.stringify({ url })
+  });
+  if (!response.ok) throw new Error('Failed to create webhook');
+  return response.json();
+}
+
+export async function deleteWebhook(workspaceId: string, webhookId: number) {
+  const response = await apiFetch(`/workspaces/${workspaceId}/webhooks/${webhookId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete webhook');
+  }
+  return response.json();
+}
+
+/**
+ * Lists API keys for the authenticated user.
+ */
+export async function getApiKeys() {
+  const response = await apiFetch('/auth/api-keys');
+  if (!response.ok) {
+    throw new Error('Failed to list API keys');
+  }
+  return response.json();
+}
+
+/**
+ * Creates a new API key.
+ */
+export async function createApiKey(name: string) {
+  const response = await apiFetch('/auth/api-keys', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create API key');
+  }
+  return response.json();
+}
+
+/**
+ * Revokes an API key.
+ */
+export async function revokeApiKey(keyId: number) {
+  const response = await apiFetch(`/auth/api-keys/${keyId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to revoke API key');
+  }
+  return response.json();
+}

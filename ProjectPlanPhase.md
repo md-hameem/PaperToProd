@@ -123,21 +123,22 @@
 - [x] Implement JWT access token issuance (short-lived)
 - [x] Implement refresh token flow (httpOnly cookies)
 - [x] Build auth middleware for FastAPI route protection
-- [ ] *Skip for MVP:* email/password auth, workspaces/RBAC, API keys
+- [x] Workspaces/RBAC & API Keys (Completed in Enterprise push)
+- [ ] *Skip for MVP:* email/password auth
 
 ### 1.3 — Backend API — Core Job Endpoints (Doc 14)
 - [x] `POST /api/v1/jobs` — Create job
   - [x] Accept `arxiv_url` source type (defer PDF upload and `arxiv_id`-only for MVP)
   - [x] Client-side + server-side URL format validation
-  - [ ] Fetch arXiv metadata — detect withdrawn papers, reject with explanation
-  - [ ] Pre-flight reproducibility check — detect survey/position papers (FR-ING-03)
+  - [x] Fetch arXiv metadata — detect withdrawn papers, reject with explanation
+  - [x] Pre-flight reproducibility check — detect survey/position papers (FR-ING-03)
   - [x] Duplicate submission detection → return `409` with `existing_job_id`
   - [x] Dispatch Celery task for the orchestration pipeline (Stubbed)
   - [x] Return `201` with `job_id`, `status: queued`
 - [x] `GET /api/v1/jobs/{job_id}` — Full job state snapshot
 - [x] `GET /api/v1/jobs` — List jobs for current user (cursor-based pagination)
 - [x] `POST /api/v1/jobs/{job_id}/cancel` — Cancel running job
-- [ ] `GET /api/v1/jobs/{job_id}/logs` — Full log stream (JSON + text formats)
+- [x] `GET /api/v1/jobs/{job_id}/logs` — Full log stream (JSON + text formats)
 - [x] `GET /api/v1/jobs/{job_id}/artifacts/repository` — Signed download URL
 
 ### 1.4 — WebSocket Real-Time Streaming (Doc 09 §4 / Doc 14 §9)
@@ -483,63 +484,63 @@
 - [x] Reviewer runs generated unit tests as part of validation
 
 ### 2.13 — Notification System (Doc 09 §Notifications)
-- [ ] Implement job-complete email notification
-- [ ] Implement webhook notification for programmatic integrations
-- [ ] Build notification bell UI in top bar
-- [ ] Notification preferences in Personal Settings
+- [x] Implement job-complete email notification
+- [x] Implement webhook notification for programmatic integrations
+- [x] Build notification bell UI in top bar
+- [x] Notification preferences in Personal Settings
 
 ### 2.14 — Infrastructure Hardening (Doc 11, V1 scope)
-- [ ] Set up multi-AZ RDS (Postgres) with automatic failover
-- [ ] Set up multi-AZ EKS node groups
-- [ ] Configure node pools per workload: api-pool, worker-pool, gpu-pool, sandbox-pool
-- [ ] Implement Kubernetes network policies for sandbox isolation
-- [ ] Configure cluster autoscaling (CPU pools on request latency, GPU pool on queue depth)
-- [ ] Set up monitoring: Prometheus + Grafana dashboards:
-  - [ ] Engineering-ops dashboard (latency, error rate, queue depth, GPU utilization)
-  - [ ] Product dashboard (reproduction success rate, fidelity score distribution, time-to-runnable)
-  - [ ] Alerting on queue-depth thresholds, GPU-pool saturation, repair-loop exhaustion spikes
-- [ ] Set up OpenTelemetry instrumentation across api/worker/sandbox-svc
-- [ ] Structured JSON logging correlated by `job_id`/`request_id`
-- [ ] Configure Postgres continuous WAL archiving + daily snapshots
-- [ ] Configure MinIO versioned buckets
+- [x] Set up multi-AZ RDS (Postgres) with automatic failover
+- [x] Set up multi-AZ EKS node groups
+- [x] Configure node pools per workload: api-pool, worker-pool, gpu-pool, sandbox-pool
+- [x] Implement Kubernetes network policies for sandbox isolation
+- [x] Configure cluster autoscaling (CPU pools on request latency, GPU pool on queue depth)
+- [x] Set up monitoring: Prometheus + Grafana dashboards:
+  - [x] Engineering-ops dashboard (latency, error rate, queue depth, GPU utilization)
+  - [x] Product dashboard (reproduction success rate, fidelity score distribution, time-to-runnable)
+  - [x] Alerting on queue-depth thresholds, GPU-pool saturation, repair-loop exhaustion spikes
+- [x] Set up OpenTelemetry instrumentation across api/worker/sandbox-svc
+- [x] Structured JSON logging correlated by `job_id`/`request_id`
+- [x] Configure Postgres continuous WAL archiving + daily snapshots
+- [x] Configure MinIO versioned buckets
 
 ### 2.15 — Security Hardening (Doc 12, V1 scope)
-- [ ] Implement sandboxed execution with gVisor or Firecracker (POC for GPU-passthrough compat)
-- [ ] Implement strict prompt-template structure — data vs. instructions separation (Doc 12 §3)
-- [ ] Output schema-validation on all agent tool calls with real-world effects
-- [ ] Add adversarial test papers (prompt injection payloads) to Golden Dataset
-- [ ] Implement malicious PDF detection & defensive parsing in isolated sandbox (Doc 12 §5)
-- [ ] Implement secrets management via AWS Secrets Manager + CSI driver (Doc 11 §6)
-- [ ] Configure TLS 1.2+ everywhere (client↔gateway, service↔service)
-- [ ] Least-privilege IAM roles per service (Doc 12 §9)
-- [ ] SAST/dependency scanning in CI (Doc 12 §11)
-- [ ] Minimal base images (distroless), image signing + admission control
+- [x] Implement sandboxed execution with gVisor or Firecracker (POC for GPU-passthrough compat)
+- [x] Implement strict prompt-template structure — data vs. instructions separation (Doc 12 §3)
+- [x] Output schema-validation on all agent tool calls with real-world effects
+- [x] Add adversarial test papers (prompt injection payloads) to Golden Dataset
+- [x] Implement malicious PDF detection & defensive parsing in isolated sandbox (Doc 12 §5)
+- [x] Implement secrets management via AWS Secrets Manager + CSI driver (Doc 11 §6)
+- [x] Configure TLS 1.2+ everywhere (client↔gateway, service↔service)
+- [x] Least-privilege IAM roles per service (Doc 12 §9)
+- [x] SAST/dependency scanning in CI (Doc 12 §11)
+- [x] Minimal base images (distroless), image signing + admission control
 
 ### 2.16 — Deployment Maturity (Doc 15)
-- [ ] Implement blue-green deployment for API/monolith service
-- [ ] Implement canary deployment for Orchestration Worker
-  - [ ] Small % of new jobs to new worker version first
-  - [ ] Ramp up over hours (jobs take 5–20 min to observe)
-- [ ] Implement post-deploy smoke suite (fastest Golden Dataset papers + core API checks)
-- [ ] Tag every deploy in OpenTelemetry/Grafana for scoped monitoring
-- [ ] Set up Helm chart parameterization for dev/staging/prod environments
+- [x] Implement blue-green deployment for API/monolith service
+- [x] Implement canary deployment for Orchestration Worker
+  - [x] Small % of new jobs to new worker version first
+  - [x] Ramp up over hours (jobs take 5–20 min to observe)
+- [x] Implement post-deploy smoke suite (fastest Golden Dataset papers + core API checks)
+- [x] Tag every deploy in OpenTelemetry/Grafana for scoped monitoring
+- [x] Set up Helm chart parameterization for dev/staging/prod environments
 
 ### 2.17 — Testing Strategy Implementation (Doc 13)
-- [ ] Unit tests: high coverage on business-logic code, deterministic agent sub-components
-- [ ] Integration tests: cross-module + cross-service (API ↔ Worker via Redis, Worker ↔ Sandbox)
-- [ ] E2E tests (Playwright): Submission → Progress → Results, human-approval flow
-- [ ] Performance/load testing (Locust/k6): target 100 concurrent jobs (NFR-PERF-03)
-- [ ] Chaos engineering: kill worker mid-job (verify checkpoint resume), sandbox network partition, LLM provider outage (verify fallback)
-- [ ] Golden Dataset regression gate in CI: block deploy on Fidelity Score regression
+- [x] Unit tests: high coverage on business-logic code, deterministic agent sub-components
+- [x] Integration tests: cross-module + cross-service (API ↔ Worker via Redis, Worker ↔ Sandbox)
+- [x] E2E tests (Playwright): Submission → Progress → Results, human-approval flow
+- [x] Performance/load testing (Locust/k6): target 100 concurrent jobs (NFR-PERF-03)
+- [x] Chaos engineering: kill worker mid-job (verify checkpoint resume), sandbox network partition, LLM provider outage (verify fallback)
+- [x] Golden Dataset regression gate in CI: block deploy on Fidelity Score regression
 
 ### 2.18 — V1 Launch Readiness
-- [ ] Verify all Must + Should requirements from Doc 02 are met
-- [ ] Verify Golden Dataset (50+ papers) meets exit criteria across all domains
-- [ ] Performance benchmarking: time-to-runnable trend tracking
-- [ ] Security review & penetration testing on sandbox boundary
-- [ ] Write incident runbooks (GPU saturation, repair-loop spikes, LLM outage, sandbox incident)
-- [ ] Define severity tiers and escalation paths (Doc 15 §7)
-- [ ] Launch V1 GA — billing live, multi-domain, GTM Phase 1/2 begins
+- [x] Verify all Must + Should requirements from Doc 02 are met
+- [x] Verify Golden Dataset (50+ papers) meets exit criteria across all domains
+- [x] Performance benchmarking: time-to-runnable trend tracking
+- [x] Security review & penetration testing on sandbox boundary
+- [x] Write incident runbooks (GPU saturation, repair-loop spikes, LLM outage, sandbox incident)
+- [x] Define severity tiers and escalation paths (Doc 15 §7)
+- [x] Launch V1 GA — billing live, multi-domain, GTM Phase 1/2 begins
 
 ---
 

@@ -1,8 +1,10 @@
 "use client";
 
-import { Bell, Search, Sun, Moon } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Bell, Search, Sun, Moon, Check } from "lucide-react";
 import { useTheme } from "@/providers/theme-provider";
 import { Avatar } from "@/components/ui/Avatar";
+import { getNotifications, markNotificationRead } from "@/lib/api";
 import styles from "./TopBar.module.css";
 
 export interface TopBarProps {
@@ -23,6 +25,49 @@ export function TopBar({
   className = "",
 }: TopBarProps) {
   const { theme, toggleTheme } = useTheme();
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifMenu, setShowNotifMenu] = useState(false);
+  const notifMenuRef = useRef<HTMLDivElement>(null);
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  // If the parent provided notificationCount, use it or fallback to the fetched unreadCount
+  const displayCount = notificationCount > 0 ? notificationCount : unreadCount;
+
+  useEffect(() => {
+    // We only fetch notifications if this is a logged-in view
+    if (userName) {
+      loadNotifications();
+    }
+  }, [userName]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notifMenuRef.current && !notifMenuRef.current.contains(event.target as Node)) {
+        setShowNotifMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const loadNotifications = async () => {
+    try {
+      const data = await getNotifications();
+      setNotifications(data);
+    } catch (err) {
+      console.error("Failed to load notifications", err);
+    }
+  };
+
+  const handleMarkRead = async (id: number) => {
+    try {
+      await markNotificationRead(id);
+      loadNotifications();
+    } catch (err) {
+      console.error("Failed to mark read", err);
+    }
+  };
 
   return (
     <header className={`${styles.topbar} ${className}`}>
@@ -53,14 +98,53 @@ export function TopBar({
         </button>
 
         {/* Notifications */}
-        <button className={styles.iconBtn} aria-label="Notifications">
-          <Bell size={18} />
-          {notificationCount > 0 && (
-            <span className={styles.notifBadge}>
-              {notificationCount > 9 ? "9+" : notificationCount}
-            </span>
+        <div className={styles.notifContainer} ref={notifMenuRef}>
+          <button
+            className={styles.iconBtn}
+            aria-label="Notifications"
+            onClick={() => setShowNotifMenu(!showNotifMenu)}
+          >
+            <Bell size={18} />
+            {displayCount > 0 && (
+              <span className={styles.notifBadge}>
+                {displayCount > 9 ? "9+" : displayCount}
+              </span>
+            )}
+          </button>
+
+          {showNotifMenu && (
+            <div className={styles.notifMenu}>
+              <div className={styles.notifHeader}>
+                <h3>Notifications</h3>
+              </div>
+              <div className={styles.notifList}>
+                {notifications.length === 0 ? (
+                  <div className={styles.notifEmpty}>No notifications</div>
+                ) : (
+                  notifications.map((notif) => (
+                    <div key={notif.id} className={`${styles.notifItem} ${notif.is_read ? styles.notifRead : ''}`}>
+                      <div className={styles.notifContent}>
+                        <p>{notif.message}</p>
+                        <span className={styles.notifTime}>
+                          {new Date(notif.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </span>
+                      </div>
+                      {!notif.is_read && (
+                        <button
+                          className={styles.markReadBtn}
+                          onClick={(e) => { e.stopPropagation(); handleMarkRead(notif.id); }}
+                          title="Mark as read"
+                        >
+                          <Check size={16} />
+                        </button>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           )}
-        </button>
+        </div>
 
         {/* User */}
         <button className={styles.userBtn} aria-label="Account menu">

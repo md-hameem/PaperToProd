@@ -1,0 +1,14 @@
+# Development overrides
+replicaCount: 1
+image:
+  repository: papertoprod-api
+  tag: latest
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+env:
+  LOG_LEVEL: "DEBUG"

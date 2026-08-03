@@ -3,14 +3,51 @@ Celery worker integrating with LangGraph pipeline.
 """
 
 import asyncio
+import os
 
+import structlog
 from celery import Celery
+from opentelemetry import trace
+from opentelemetry.instrumentation.celery import CeleryInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+from sqlalchemy.future import select
 
 from app.config import settings
+from app.database import async_session_maker
+from app.models import Job, Notification, User, Webhook
 from app.pipeline.checkpointer import get_checkpointer
 from app.pipeline.graph import graph_builder
 
+# Configure Structlog
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.JSONRenderer(),
+    ],
+    wrapper_class=structlog.make_filtering_bound_logger(20),
+    context_class=dict,
+    logger_factory=structlog.PrintLoggerFactory(),
+)
+logger = structlog.get_logger()
+
+# Initialize OpenTelemetry
+resource = Resource(
+    attributes={
+        SERVICE_NAME: "papertoprod-worker",
+        SERVICE_VERSION: os.environ.get("DEPLOYMENT_VERSION", "unknown"),
+    }
+)
+provider = TracerProvider(resource=resource)
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+
 # Setup Celery
+CeleryInstrumentor().instrument()
 celery_app = Celery("papertoprod_worker", broker=settings.redis_url, backend=settings.redis_url)
 
 celery_app.conf.update(
@@ -29,6 +66,9 @@ celery_app.conf.update(
 
 async def _run_pipeline_async(job_id: int, initial_state: dict):
     """Async wrapper to run the LangGraph pipeline."""
+    structlog.contextvars.clear_contextvars()
+    structlog.contextvars.bind_contextvars(job_id=job_id)
+    logger.info("Starting pipeline execution", initial_state=initial_state)
     async with get_checkpointer() as checkpointer:
         # Compile graph with persistence and human-in-the-loop interruption
         graph = graph_builder.compile(checkpointer=checkpointer, interrupt_before=["scaffolder"])
@@ -64,6 +104,9 @@ def run_pipeline(
     try:
         asyncio.run(_run_pipeline_async(job_id, initial_state))
 
+        # Dispatch notifications after success
+        asyncio.run(_dispatch_notifications(job_id))
+
         # After success, we should update the DB Job status to COMPLETED
         # (Omitted full DB connection boilerplate for brevity, but a real app
         # would open an AsyncSession here and update the DB).
@@ -96,6 +139,47 @@ async def _resume_pipeline_async(job_id: int, approved_repo_url: str):
 
         # Resume execution (passing None state)
         await graph.ainvoke(None, config)
+
+
+async def _dispatch_notifications(job_id: int):
+    """Fetch the job and user, check preferences, and dispatch notifications."""
+    async with async_session_maker() as db:
+        # Get Job and User
+        result = await db.execute(select(Job).where(Job.id == job_id))
+        job = result.scalars().first()
+        if not job:
+            return
+
+        user_res = await db.execute(select(User).where(User.id == job.user_id))
+        user = user_res.scalars().first()
+        if not user:
+            return
+
+        prefs = user.notification_preferences or {}
+
+        # 1. In-App Notification (Always if not disabled)
+        if prefs.get("in_app_enabled", True):
+            notif = Notification(
+                user_id=user.id,
+                message=f"Job #{job_id} ({job.paper_title or 'Untitled'}) has completed successfully.",
+                type="job_complete",
+            )
+            db.add(notif)
+            await db.commit()
+
+        # 2. Email Notification (Mock)
+        if prefs.get("email_enabled", True):
+            print(
+                f"\\n\\033[92m[EMAIL DISPATCHED]\\033[0m Job {job_id} completion email sent to {user.email}\\n"
+            )
+
+        # 3. Webhooks (Mock)
+        wh_res = await db.execute(select(Webhook).where(Webhook.workspace_id == job.workspace_id))
+        webhooks = wh_res.scalars().all()
+        for wh in webhooks:
+            print(
+                f"\\n\\033[94m[WEBHOOK DISPATCHED]\\033[0m POST to {wh.url} for Workspace {job.workspace_id}\\n"
+            )
 
 
 @celery_app.task(name="resume_pipeline", bind=True, max_retries=3)

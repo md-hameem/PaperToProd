@@ -1,0 +1,14 @@
+# Production overrides
+replicaCount: 5
+image:
+  repository: us-east-1.amazonaws.com/papertoprod-api
+  tag: prod
+resources:
+  limits:
+    cpu: "2"
+    memory: "2Gi"
+  requests:
+    cpu: "1"
+    memory: "1Gi"
+env:
+  LOG_LEVEL: "INFO"

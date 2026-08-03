@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
-import { getWorkspaceMembers, inviteWorkspaceMember, changeWorkspaceRole, removeWorkspaceMember } from "@/lib/api";
+import { getWorkspaceMembers, inviteWorkspaceMember, changeWorkspaceRole, removeWorkspaceMember, getWebhooks, createWebhook, deleteWebhook, getWorkspaceUsage, createCheckoutSession, getGitHubIntegration, installGitHub, disconnectGitHub, getApiKeys, createApiKey, revokeApiKey } from "@/lib/api";
 import styles from "./workspace-settings.module.css";
-import { Users, Shield, Plus, X, Settings as SettingsIcon } from "lucide-react";
+import { Users, Shield, Plus, X, Settings as SettingsIcon, Link as LinkIcon, Trash, Key } from "lucide-react";
 
 export default function WorkspaceSettingsPage() {
   const router = useRouter();
@@ -30,22 +30,64 @@ export default function WorkspaceSettingsPage() {
     }
   }, [activeWorkspace]);
 
-import { getWorkspaceUsage, createCheckoutSession, getGitHubIntegration, installGitHub, disconnectGitHub } from "@/lib/api";
-
-// ... existing code ...
   const [activeTab, setActiveTab] = useState("members");
   const [usage, setUsage] = useState<any>(null);
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [githubIntegration, setGithubIntegration] = useState<any>(null);
   const [loadingGithub, setLoadingGithub] = useState(false);
+  const [webhooks, setWebhooks] = useState<any[]>([]);
+  const [loadingWebhooks, setLoadingWebhooks] = useState(false);
+  const [newWebhookUrl, setNewWebhookUrl] = useState("");
+  const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [loadingApiKeys, setLoadingApiKeys] = useState(false);
+  const [newApiKeyName, setNewApiKeyName] = useState("");
+  const [generatedKey, setGeneratedKey] = useState<{name: string, raw_key: string} | null>(null);
 
   useEffect(() => {
     if (activeWorkspace) {
       loadMembers();
       loadUsage();
       loadGithub();
+      loadWebhooks();
+      loadApiKeys();
     }
   }, [activeWorkspace]);
+
+  const loadWebhooks = async () => {
+    if (!activeWorkspace) return;
+    setLoadingWebhooks(true);
+    try {
+      const data = await getWebhooks(activeWorkspace.id.toString());
+      setWebhooks(data);
+    } catch (err) {
+      console.error("Failed to load webhooks", err);
+    } finally {
+      setLoadingWebhooks(false);
+    }
+  };
+
+  const handleCreateWebhook = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeWorkspace || !newWebhookUrl) return;
+    try {
+      await createWebhook(activeWorkspace.id.toString(), newWebhookUrl);
+      setNewWebhookUrl("");
+      loadWebhooks();
+    } catch (err: any) {
+      alert(err.message || "Failed to create webhook");
+    }
+  };
+
+  const handleDeleteWebhook = async (id: number) => {
+    if (!activeWorkspace) return;
+    if (!confirm("Are you sure you want to delete this webhook?")) return;
+    try {
+      await deleteWebhook(activeWorkspace.id.toString(), id);
+      loadWebhooks();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete webhook");
+    }
+  };
 
   const loadUsage = async () => {
     if (!activeWorkspace) return;
@@ -111,6 +153,41 @@ import { getWorkspaceUsage, createCheckoutSession, getGitHubIntegration, install
     }
   };
 
+  const loadApiKeys = async () => {
+    setLoadingApiKeys(true);
+    try {
+      const data = await getApiKeys();
+      setApiKeys(data);
+    } catch (err) {
+      console.error("Failed to load API keys", err);
+    } finally {
+      setLoadingApiKeys(false);
+    }
+  };
+
+  const handleCreateApiKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newApiKeyName) return;
+    try {
+      const data = await createApiKey(newApiKeyName);
+      setGeneratedKey(data);
+      setNewApiKeyName("");
+      loadApiKeys();
+    } catch (err: any) {
+      alert(err.message || "Failed to create API key");
+    }
+  };
+
+  const handleRevokeApiKey = async (keyId: number) => {
+    if (!confirm("Are you sure you want to revoke this API key? This action cannot be undone.")) return;
+    try {
+      await revokeApiKey(keyId);
+      loadApiKeys();
+    } catch (err: any) {
+      alert(err.message || "Failed to revoke API key");
+    }
+  };
+
   if (workspaceLoading || !activeWorkspace) {
     return <div className={styles.container}>Loading...</div>;
   }
@@ -147,6 +224,18 @@ import { getWorkspaceUsage, createCheckoutSession, getGitHubIntegration, install
               onClick={() => setActiveTab('integrations')}
             >
               Integrations
+            </button>
+            <button
+              className={`${styles.tabBtn} ${activeTab === 'webhooks' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('webhooks')}
+            >
+              Webhooks
+            </button>
+            <button
+              className={`${styles.tabBtn} ${activeTab === 'apikeys' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('apikeys')}
+            >
+              API Keys
             </button>
           </div>
 
@@ -301,6 +390,170 @@ import { getWorkspaceUsage, createCheckoutSession, getGitHubIntegration, install
               </div>
             </div>
           )}
+
+          {activeTab === 'webhooks' && (
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Programmatic Webhooks</h2>
+              </div>
+              <p style={{ color: "var(--color-text-secondary)", marginBottom: "20px" }}>
+                Webhooks allow you to receive HTTP POST requests when events occur in your workspace, such as a Job completing.
+              </p>
+
+              <form className={styles.inviteForm} onSubmit={handleCreateWebhook} style={{ marginBottom: "20px" }}>
+                <input
+                  type="url"
+                  placeholder="https://your-api.com/webhooks"
+                  value={newWebhookUrl}
+                  onChange={e => setNewWebhookUrl(e.target.value)}
+                  required
+                  className={styles.input}
+                />
+                <button type="submit" className={styles.btnPrimary}>
+                  <Plus size={16} /> Add Webhook
+                </button>
+              </form>
+
+              {loadingWebhooks ? (
+                <p className={styles.loadingText}>Loading webhooks...</p>
+              ) : webhooks.length === 0 ? (
+                <p>No webhooks configured yet.</p>
+              ) : (
+                <div className={styles.tableWrapper}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>URL</th>
+                        <th>Secret</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {webhooks.map(wh => (
+                        <tr key={wh.id}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <LinkIcon size={14} color="var(--color-text-tertiary)" />
+                              {wh.url}
+                            </div>
+                          </td>
+                          <td><span className={styles.badge}>whsec_••••••••</span></td>
+                          <td>{new Date(wh.created_at).toLocaleDateString()}</td>
+                          <td>
+                            <button
+                              className={styles.btnDestructive}
+                              onClick={() => handleDeleteWebhook(wh.id)}
+                            >
+                              <Trash size={16} /> Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'apikeys' && (
+            <>
+              {generatedKey && (
+                <div className={styles.card} style={{ borderColor: 'var(--color-success)', background: 'var(--color-bg-primary)' }}>
+                  <div className={styles.cardHeader}>
+                    <h2 className={styles.cardTitle}>Save Your API Key</h2>
+                  </div>
+                  <p className={styles.subtitle} style={{ marginBottom: '16px', color: 'var(--color-warning)' }}>
+                    Please copy this API key now. You will not be able to see it again!
+                  </p>
+                  <div className={styles.input} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'monospace', fontSize: '1.2em' }}>
+                    <span>{generatedKey.raw_key}</span>
+                    <button
+                      className={styles.btnPrimary}
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedKey.raw_key);
+                        alert('Copied to clipboard!');
+                      }}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <button className={styles.btnSecondary} onClick={() => setGeneratedKey(null)} style={{ marginTop: '16px' }}>
+                    I have saved it
+                  </button>
+                </div>
+              )}
+
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h2 className={styles.cardTitle}>Create API Key</h2>
+                </div>
+                <form className={styles.inviteForm} onSubmit={handleCreateApiKey}>
+                  <input
+                    type="text"
+                    placeholder="Key Name (e.g. CI/CD Script)"
+                    value={newApiKeyName}
+                    onChange={e => setNewApiKeyName(e.target.value)}
+                    required
+                    className={styles.input}
+                  />
+                  <button type="submit" className={styles.btnPrimary}>
+                    <Plus size={16} /> Create
+                  </button>
+                </form>
+              </div>
+
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h2 className={styles.cardTitle}>Active API Keys</h2>
+                  <span className={styles.badge}>{apiKeys.length}</span>
+                </div>
+                {loadingApiKeys ? (
+                  <p className={styles.loadingText}>Loading API keys...</p>
+                ) : (
+                  <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Prefix</th>
+                          <th>Created</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {apiKeys.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} style={{ textAlign: 'center', color: 'var(--color-text-secondary)', padding: '24px' }}>
+                              No API keys active.
+                            </td>
+                          </tr>
+                        ) : (
+                          apiKeys.map((key: any) => (
+                            <tr key={key.id}>
+                              <td><div className={styles.userName}>{key.name}</div></td>
+                              <td><code style={{ background: 'var(--color-bg-tertiary)', padding: '4px 8px', borderRadius: '4px' }}>{key.prefix}...</code></td>
+                              <td>{new Date(key.created_at).toLocaleDateString()}</td>
+                              <td>
+                                <button
+                                  className={styles.btnDestructive}
+                                  onClick={() => handleRevokeApiKey(key.id)}
+                                >
+                                  <Trash size={16} /> Revoke
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
         </div>
       </div>
     </div>

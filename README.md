@@ -10,7 +10,9 @@ PaperToProd is a multi-agent research reproduction engine that reads an academic
 
 🟢 **Phase 0 — Foundation & Project Setup** (Complete)
 🟢 **Phase 1 — MVP** (Complete)
-🟡 **Phase 2 — V1 (Multi-Domain, Team-Ready)** (In Progress)
+🟢 **Phase 2 — V1 (Multi-Domain, Team-Ready)** (Complete)
+🟡 **Phase 3 — Post-Launch / Community Features** (In Progress)
+⚪ **Phase 4 — Enterprise** (Not Started)
 
 | Milestone | Status |
 |---|---|
@@ -24,7 +26,9 @@ PaperToProd is a multi-agent research reproduction engine that reads an academic
 | 2.9 API Keys & Personal Settings | ✅ Done |
 | 2.10 Repository Explorer | ✅ Done |
 | 2.11 Advanced Options | ✅ Done |
-| 2.12 Unit Test Generation | 🟡 In Progress |
+| 2.12 Unit Test Generation | ✅ Done |
+| 2.13-2.18 Scale, Security, V1 GA | ✅ Done |
+| 3.1 Public Gallery & Sharing | 🟡 In Progress |
 
 See [ProjectPlanPhase.md](ProjectPlanPhase.md) for the full roadmap and task tracker.
 

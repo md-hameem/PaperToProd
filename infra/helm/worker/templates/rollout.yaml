@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: papertoprod-worker
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount | default 4 }}
+  strategy:
+    canary:
+      steps:
+      - setWeight: 5
+      - pause: {duration: 10m}
+      - setWeight: 20
+      - pause: {duration: 30m}
+      - setWeight: 100
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: papertoprod-worker
+  template:
+    metadata:
+      labels:
+        app: papertoprod-worker
+    spec:
+      containers:
+      - name: worker
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        env:
+        - name: DEPLOYMENT_VERSION
+          value: "{{ .Values.image.tag }}"
+        resources:
+{{ toYaml .Values.resources | indent 10 }}

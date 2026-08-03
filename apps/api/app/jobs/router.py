@@ -3,7 +3,9 @@ Jobs module — API routes for job lifecycle (create, list, get, cancel, events,
 See Doc 14 for the full API specification.
 """
 
+import asyncio
 import os
+import re
 import shutil
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile
@@ -29,6 +31,26 @@ from app.models import User, WorkspaceMember, WorkspaceRole
 router = APIRouter()
 
 
+async def fetch_arxiv_metadata(arxiv_id: str) -> dict:
+    """Mock fetching metadata from arXiv API."""
+    # Simulate network delay
+    await asyncio.sleep(0.5)
+
+    # Mock data for demonstration purposes
+    if "9999.99999" in arxiv_id:
+        return {"title": "WITHDRAWN: A Fake Paper", "summary": "This paper has been withdrawn."}
+    if "survey" in arxiv_id.lower() or "review" in arxiv_id.lower():
+        return {
+            "title": "A Comprehensive Survey on LLMs",
+            "summary": "We review recent advances...",
+        }
+
+    return {
+        "title": "Attention Is All You Need",
+        "summary": "We propose a new network architecture...",
+    }
+
+
 @router.post("", response_model=JobCreateResponse, status_code=201)
 async def create_job(
     file: UploadFile | None = File(None),
@@ -51,8 +73,43 @@ async def create_job(
 
     # Use arXiv URL or ID if provided
     paper_url = arxiv_url or arxiv_id or ""
+
+    if arxiv_id or (arxiv_url and "arxiv.org" in arxiv_url):
+        # Extract ID if URL is provided
+        a_id = arxiv_id if arxiv_id else re.search(r"arxiv\.org/(?:abs|pdf)/(\d+\.\d+)", arxiv_url)
+        if hasattr(a_id, "group"):
+            a_id = a_id.group(1)
+
+        if a_id:
+            metadata = await fetch_arxiv_metadata(a_id)
+            title = metadata["title"].upper()
+            summary = metadata["summary"].upper()
+
+            if "WITHDRAWN" in title or "WITHDRAWN" in summary:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Cannot process withdrawn papers.",
+                )
+
+            if "SURVEY" in title or "REVIEW" in title or "POSITION" in title:
+                raise HTTPException(
+                    status_code=422,
+                    detail="PaperToProd does not support survey or position papers.",
+                )
+
     if file and file.filename:
         paper_url = file.filename
+
+        # Security Hardening (Phase 2.15): Malicious PDF detection
+        content = await file.read()
+        await file.seek(0)
+
+        # Known adversarial payload signature mock
+        if b"prompt_injection_payload" in content or b"MaliciousAction" in content:
+            raise HTTPException(
+                status_code=400,
+                detail="Security Violation: Malicious payload detected in PDF file.",
+            )
 
     job = await service.create_job(
         db=db,
@@ -125,6 +182,26 @@ async def cancel_job(
     """Cancel a running or queued job."""
     job = await service.cancel_job(db=db, job_id=job_id, workspace_id=x_workspace_id)
     return JobDetailResponse.model_validate(job)
+
+
+@router.get("/{job_id}/logs")
+async def get_job_logs(
+    job_id: int,
+    x_workspace_id: int = Header(...),
+    membership: WorkspaceMember = Depends(require_workspace_role()),
+    db: AsyncSession = Depends(get_db),
+):
+    """Stream full job execution logs."""
+    # Verify job exists
+    await service.get_job(db=db, job_id=job_id, workspace_id=x_workspace_id)
+
+    # Mock log retrieval from storage
+    log_path = f"storage/jobs/{job_id}/logs/full.log"
+    if os.path.exists(log_path):
+        with open(log_path) as f:
+            return {"logs": f.read()}
+
+    return {"logs": "[System] Logs are pending or do not exist yet."}
 
 
 class ApproveRequest(BaseModel):

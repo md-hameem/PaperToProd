@@ -14,6 +14,7 @@ from enum import StrEnum
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     DateTime,
     ForeignKey,
     Index,
@@ -141,6 +142,7 @@ class User(Base):
     avatar_url: Mapped[str | None] = mapped_column(String(500))
     auth_provider: Mapped[str] = mapped_column(String(20), nullable=False)
     auth_provider_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    notification_preferences: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -153,6 +155,9 @@ class User(Base):
         back_populates="user", lazy="selectin", cascade="all, delete-orphan"
     )
     api_keys: Mapped[list["ApiKey"]] = relationship(
+        back_populates="user", lazy="selectin", cascade="all, delete-orphan"
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
         back_populates="user", lazy="selectin", cascade="all, delete-orphan"
     )
 
@@ -246,6 +251,45 @@ class JobStateCheckpoint(Base):
 
     # Relationships
     job: Mapped["Job"] = relationship(back_populates="checkpoints")
+
+
+# ── Notifications & Webhooks ──────────────────────────────────
+
+
+class Notification(Base):
+    """In-app notifications for users."""
+
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    message: Mapped[str] = mapped_column(String(500), nullable=False)
+    type: Mapped[str] = mapped_column(String(50), nullable=False)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="notifications")
+
+
+class Webhook(Base):
+    """Programmatic webhooks for workspaces."""
+
+    __tablename__ = "webhooks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    workspace_id: Mapped[int] = mapped_column(
+        ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False
+    )
+    url: Mapped[str] = mapped_column(String(1000), nullable=False)
+    secret: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    workspace: Mapped["Workspace"] = relationship()
 
 
 # ── Job Events ────────────────────────────────────────────────

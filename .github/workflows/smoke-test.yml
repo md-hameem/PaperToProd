@@ -1,0 +1,65 @@
+name: Post-Deploy Smoke Suite
+
+on:
+  deployment_status:
+
+jobs:
+  smoke_test:
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip install httpx
+
+      - name: Run API Health Check
+        run: |
+          curl -f https://api.staging.papertoprod.com/health || exit 1
+
+      - name: Submit Job to Staging
+        env:
+          API_URL: https://api.staging.papertoprod.com
+          AUTH_TOKEN: ${{ secrets.SMOKE_TEST_AUTH_TOKEN }}
+        run: |
+          # Use a fast paper from Golden Dataset (e.g. arXiv ID 1706.03762 "Attention Is All You Need" - wait that's not fast, maybe just a mock)
+          cat << 'EOF' > run_smoke.py
+          import httpx
+          import os
+          import time
+          import sys
+
+          api_url = os.environ["API_URL"]
+          token = os.environ["AUTH_TOKEN"]
+
+          headers = {"Authorization": f"Bearer {token}", "x-workspace-id": "1"}
+          data = {"arxiv_id": "mock_1234"}
+
+          print("Submitting job...")
+          res = httpx.post(f"{api_url}/jobs", data=data, headers=headers)
+          if res.status_code != 201:
+              print("Failed to submit job:", res.text)
+              sys.exit(1)
+
+          job_id = res.json()["id"]
+          print(f"Job created: {job_id}. Polling for completion...")
+
+          # Poll for max 5 minutes
+          for _ in range(60):
+              res = httpx.get(f"{api_url}/jobs/{job_id}", headers=headers)
+              status = res.json()["status"]
+              print(f"Status: {status}")
+              if status == "completed":
+                  print("Smoke test passed!")
+                  sys.exit(0)
+              elif status == "failed":
+                  print("Smoke test failed!")
+                  sys.exit(1)
+              time.sleep(5)
+
+          print("Timeout waiting for job completion")
+          sys.exit(1)
+          EOF
+
+          python run_smoke.py

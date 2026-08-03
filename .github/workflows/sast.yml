@@ -1,0 +1,30 @@
+name: Security Scanning (SAST)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  sast_scan:
+    name: Run Bandit & Safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install Bandit & Safety
+        run: pip install bandit safety
+
+      - name: Run Bandit (SAST)
+        run: bandit -r apps/ packages/ -ll
+
+      - name: Run Safety (Dependency Vulnerabilities)
+        run: |
+          pip install -r apps/api/requirements.txt
+          safety check

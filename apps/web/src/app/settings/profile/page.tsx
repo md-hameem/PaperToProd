@@ -16,6 +16,7 @@ export default function ProfileSettingsPage() {
   const [profile, setProfile] = useState<any>(null);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
+  const [notificationPreferences, setNotificationPreferences] = useState({ email_enabled: true, in_app_enabled: true });
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
 
@@ -38,6 +39,9 @@ export default function ProfileSettingsPage() {
       setProfile(data);
       setDisplayName(data.display_name || "");
       setEmail(data.email || "");
+      if (data.notification_preferences) {
+        setNotificationPreferences(data.notification_preferences);
+      }
     } catch (err) {
       console.error("Failed to load profile", err);
       // Maybe not logged in
@@ -61,7 +65,11 @@ export default function ProfileSettingsPage() {
     e.preventDefault();
     setSavingProfile(true);
     try {
-      const data = await updateProfile({ display_name: displayName, email });
+      const data = await updateProfile({
+        display_name: displayName,
+        email,
+        notification_preferences: notificationPreferences
+      });
       setProfile(data);
       setProfileMessage("Profile updated successfully!");
       setTimeout(() => setProfileMessage(""), 3000);
@@ -131,7 +139,13 @@ export default function ProfileSettingsPage() {
               className={`${styles.tabBtn} ${activeTab === 'api-keys' ? styles.activeTab : ''}`}
               onClick={() => setActiveTab('api-keys')}
             >
-              Developer API Keys
+              <Key size={18} /> API Keys
+            </button>
+            <button
+              className={`${styles.tabBtn} ${activeTab === 'notifications' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('notifications')}
+            >
+              <Bell size={18} /> Notifications
             </button>
           </div>
 
@@ -165,6 +179,38 @@ export default function ProfileSettingsPage() {
 
                 <button type="submit" className={styles.btnPrimary} disabled={savingProfile}>
                   {savingProfile ? "Saving..." : "Save Changes"}
+                </button>
+                {profileMessage && <p style={{ color: "var(--color-status-success)", marginTop: "10px" }}>{profileMessage}</p>}
+              </form>
+            </div>
+          )}
+
+          {activeTab === 'notifications' && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>Notification Preferences</h2>
+              <form onSubmit={handleUpdateProfile}>
+                <div className={styles.formGroup} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input
+                    type="checkbox"
+                    id="email_notifs"
+                    checked={notificationPreferences.email_enabled}
+                    onChange={(e) => setNotificationPreferences({...notificationPreferences, email_enabled: e.target.checked})}
+                  />
+                  <label htmlFor="email_notifs" style={{ margin: 0 }}>Email Notifications</label>
+                </div>
+
+                <div className={styles.formGroup} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input
+                    type="checkbox"
+                    id="inapp_notifs"
+                    checked={notificationPreferences.in_app_enabled}
+                    onChange={(e) => setNotificationPreferences({...notificationPreferences, in_app_enabled: e.target.checked})}
+                  />
+                  <label htmlFor="inapp_notifs" style={{ margin: 0 }}>In-App Notifications</label>
+                </div>
+
+                <button type="submit" className={styles.btnPrimary} disabled={savingProfile}>
+                  {savingProfile ? "Saving..." : "Save Preferences"}
                 </button>
                 {profileMessage && <p style={{ color: "var(--color-status-success)", marginTop: "10px" }}>{profileMessage}</p>}
               </form>
