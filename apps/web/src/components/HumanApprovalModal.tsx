@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Github, Star, Clock, FileCode, CheckCircle, SearchCode } from 'lucide-react';
+import { Github as GithubIcon, Star, Clock, FileCode, CheckCircle, SearchCode } from 'lucide-react';
 import styles from './HumanApprovalModal.module.css';
 
 interface CandidateRepo {

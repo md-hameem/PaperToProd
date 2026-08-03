@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
-import { getWorkspaceMembers, inviteWorkspaceMember, changeWorkspaceRole, removeWorkspaceMember, getWebhooks, createWebhook, deleteWebhook, getWorkspaceUsage, createCheckoutSession, getGitHubIntegration, installGitHub, disconnectGitHub, getApiKeys, createApiKey, revokeApiKey } from "@/lib/api";
+import { getWorkspaceMembers, inviteWorkspaceMember, changeWorkspaceRole, removeWorkspaceMember, getWebhooks, createWebhook, deleteWebhook, getWorkspaceUsage, createCheckoutSession, getGitHubIntegration, installGitHub, disconnectGitHub, getApiKeys, createApiKey, revokeApiKey, getWorkspaceIntegrations, addBYOKey, removeBYOKey } from "@/lib/api";
 import styles from "./workspace-settings.module.css";
-import { Users, Shield, Plus, X, Settings as SettingsIcon, Link as LinkIcon, Trash, Key } from "lucide-react";
+import { Users, Shield, Plus, X, Settings as SettingsIcon, Link as LinkIcon, Trash, Key, Cpu } from "lucide-react";
 
 export default function WorkspaceSettingsPage() {
   const router = useRouter();
@@ -18,17 +18,52 @@ export default function WorkspaceSettingsPage() {
   const [inviteRole, setInviteRole] = useState("member");
   const [inviteError, setInviteError] = useState<string | null>(null);
 
+  const [integrations, setIntegrations] = useState<any>(null);
+  const [loadingIntegrations, setLoadingIntegrations] = useState(false);
+  const [byoProvider, setByoProvider] = useState("openai");
+  const [byoKey, setByoKey] = useState("");
+
+  const loadIntegrations = async () => {
+    if (!activeWorkspace) return;
+    setLoadingIntegrations(true);
+    try {
+      const data = await getWorkspaceIntegrations(activeWorkspace.id.toString());
+      setIntegrations(data);
+    } catch (err) {
+      console.error("Failed to load integrations", err);
+    } finally {
+      setLoadingIntegrations(false);
+    }
+  };
+
+  const handleAddBYOKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeWorkspace || !byoKey) return;
+    try {
+      await addBYOKey(activeWorkspace.id.toString(), byoProvider, byoKey);
+      setByoKey("");
+      loadIntegrations();
+    } catch (err: any) {
+      alert(err.message || "Failed to add BYO API key");
+    }
+  };
+
+  const handleRemoveBYOKey = async () => {
+    if (!activeWorkspace) return;
+    if (!confirm("Are you sure you want to remove the custom LLM API key?")) return;
+    try {
+      await removeBYOKey(activeWorkspace.id.toString());
+      loadIntegrations();
+    } catch (err: any) {
+      alert(err.message || "Failed to remove BYO API key");
+    }
+  };
+
   useEffect(() => {
     if (!workspaceLoading && !activeWorkspace) {
       router.replace("/login");
     }
   }, [workspaceLoading, activeWorkspace, router]);
-
-  useEffect(() => {
-    if (activeWorkspace) {
-      loadMembers();
-    }
-  }, [activeWorkspace]);
 
   const [activeTab, setActiveTab] = useState("members");
   const [usage, setUsage] = useState<any>(null);
@@ -50,8 +85,54 @@ export default function WorkspaceSettingsPage() {
       loadGithub();
       loadWebhooks();
       loadApiKeys();
+      loadIntegrations();
     }
   }, [activeWorkspace]);
+
+  const loadMembers = async () => {
+    if (!activeWorkspace) return;
+    setLoading(true);
+    try {
+      const data = await getWorkspaceMembers(activeWorkspace.id.toString());
+      setMembers(data);
+    } catch (err) {
+      console.error("Failed to load members", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeWorkspace) return;
+    try {
+      await inviteWorkspaceMember(activeWorkspace.id.toString(), inviteEmail, inviteRole);
+      setInviteEmail("");
+      loadMembers();
+    } catch (err: any) {
+      setInviteError(err.message || "Failed to invite member");
+    }
+  };
+
+  const handleChangeRole = async (userId: string, role: string) => {
+    if (!activeWorkspace) return;
+    try {
+      await changeWorkspaceRole(activeWorkspace.id.toString(), userId, role);
+      loadMembers();
+    } catch (err: any) {
+      alert(err.message || "Failed to change role");
+    }
+  };
+
+  const handleRemove = async (userId: string) => {
+    if (!activeWorkspace || !confirm("Are you sure?")) return;
+    try {
+      await removeWorkspaceMember(activeWorkspace.id.toString(), userId);
+      loadMembers();
+    } catch (err: any) {
+      alert(err.message || "Failed to remove member");
+    }
+  };
 
   const loadWebhooks = async () => {
     if (!activeWorkspace) return;
@@ -386,6 +467,62 @@ export default function WorkspaceSettingsPage() {
                   <button onClick={handleInstallGithub} className={styles.btnPrimary}>
                     Connect GitHub App
                   </button>
+                )}
+              </div>
+
+              <hr style={{ margin: "32px 0", border: "0", borderTop: "1px solid var(--color-border)" }} />
+
+              <div className={styles.integrationCard}>
+                <div className={styles.integrationHeader}>
+                  <div>
+                    <h3>Bring Your Own LLM Key</h3>
+                    <p>Enterprise users can provide their own API key to bypass PaperToProd usage limits and get billed directly by the provider.</p>
+                  </div>
+                  {activeWorkspace.subscription_tier !== "enterprise" && (
+                    <span className={styles.enterpriseBadge}>Enterprise Only</span>
+                  )}
+                </div>
+
+                {loadingIntegrations ? (
+                  <p>Loading...</p>
+                ) : integrations?.byo_llm?.has_key ? (
+                  <div className={styles.integrationActive}>
+                    <div className={styles.statusBadge}>
+                      <span className={styles.statusDotActive}></span>
+                      Active ({integrations.byo_llm.provider})
+                    </div>
+                    <button className={styles.btnDestructive} onClick={handleRemoveBYOKey}>
+                      Remove Key
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleAddBYOKey} className={styles.inviteForm}>
+                    <select
+                      value={byoProvider}
+                      onChange={(e) => setByoProvider(e.target.value)}
+                      disabled={activeWorkspace.subscription_tier !== "enterprise"}
+                      className={styles.select}
+                    >
+                      <option value="openai">OpenAI</option>
+                      <option value="anthropic">Anthropic</option>
+                    </select>
+                    <input
+                      type="password"
+                      placeholder="sk-..."
+                      value={byoKey}
+                      onChange={(e) => setByoKey(e.target.value)}
+                      disabled={activeWorkspace.subscription_tier !== "enterprise"}
+                      className={styles.input}
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className={styles.btnPrimary}
+                      disabled={activeWorkspace.subscription_tier !== "enterprise"}
+                    >
+                      Save Key
+                    </button>
+                  </form>
                 )}
               </div>
             </div>

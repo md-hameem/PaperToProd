@@ -11,8 +11,8 @@ PaperToProd is a multi-agent research reproduction engine that reads an academic
 🟢 **Phase 0 — Foundation & Project Setup** (Complete)
 🟢 **Phase 1 — MVP** (Complete)
 🟢 **Phase 2 — V1 (Multi-Domain, Team-Ready)** (Complete)
-🟡 **Phase 3 — Post-Launch / Community Features** (In Progress)
-⚪ **Phase 4 — Enterprise** (Not Started)
+🟢 **Phase 3 — Post-Launch / Community Features** (Complete)
+🟡 **Phase 4 — Enterprise** (In Progress)
 
 | Milestone | Status |
 |---|---|
@@ -28,7 +28,9 @@ PaperToProd is a multi-agent research reproduction engine that reads an academic
 | 2.11 Advanced Options | ✅ Done |
 | 2.12 Unit Test Generation | ✅ Done |
 | 2.13-2.18 Scale, Security, V1 GA | ✅ Done |
-| 3.1 Public Gallery & Sharing | 🟡 In Progress |
+| 3.1–3.9 Post-Launch / Community Features | ✅ Done |
+| 4.1 Enterprise Deployment | ✅ Done |
+| 4.2 Full Audit Log | 🟡 In Progress |
 
 See [ProjectPlanPhase.md](ProjectPlanPhase.md) for the full roadmap and task tracker.
 
@@ -203,9 +205,9 @@ Full architecture documentation lives in [`Docs/`](Docs/):
 | **Phase 0** | Foundation & Project Setup | 🟢 Complete |
 | **Phase 1 (Backend)** | MVP Core Loop Engine (FastAPI + LangGraph) | 🟢 Complete |
 | **Phase 1 (Frontend)**| MVP Web UI (Auth, Dashboard, Job Logs) | 🟢 Complete |
-| **Phase 2** | V1 — Multi-Domain, Teams, Billing | 🟡 In Progress |
-| **Phase 3** | V2 — Gallery, Benchmarks, Enterprise Foundations | ⬜ Not Started |
-| **Phase 4** | Enterprise — On-Prem, SSO, Compliance | ⬜ Not Started |
+| **Phase 2** | V1 — Multi-Domain, Teams, Billing | 🟢 Complete |
+| **Phase 3** | V2 — Gallery, Benchmarks, Enterprise Foundations | 🟢 Complete |
+| **Phase 4** | Enterprise — On-Prem, SSO, Compliance | 🟡 In Progress |
 | **Phase 5** | Future AI — Multi-paper synthesis, IDE extensions | ⬜ Not Started |
 
 ## License

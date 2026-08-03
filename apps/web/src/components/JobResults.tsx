@@ -17,13 +17,23 @@ interface JobResultsProps {
   };
   gaps: string[];
   advancedOptions?: Record<string, any> | null;
+  isPublic?: boolean;
+  readOnly?: boolean;
+  allowDownload?: boolean;
 }
 
-export function JobResults({ jobId, score, stats, gaps, advancedOptions }: JobResultsProps) {
+export function JobResults({ jobId, score, stats, gaps, advancedOptions, isPublic: initialIsPublic, readOnly = false, allowDownload = true }: JobResultsProps) {
   const { activeWorkspace } = useWorkspace();
   const [showGithubModal, setShowGithubModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareExpires, setShareExpires] = useState<number | null>(7);
+  const [shareAllowDownload, setShareAllowDownload] = useState(false);
+  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
   const [repoName, setRepoName] = useState(`papertoprod-${jobId}`);
   const [isPushing, setIsPushing] = useState(false);
+  const [isPublic, setIsPublic] = useState(initialIsPublic || false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const handleDownload = () => {
     alert(`Downloading repository archive for Job #${jobId}...`);
@@ -42,6 +52,41 @@ export function JobResults({ jobId, score, stats, gaps, advancedOptions }: JobRe
       alert(`Failed to push to GitHub: ${err.message}`);
     } finally {
       setIsPushing(false);
+    }
+  };
+
+  const handleToggleGallery = async () => {
+    setIsPublishing(true);
+    try {
+      const { publishToGallery, removeFromGallery } = await import('@/lib/api');
+      if (isPublic) {
+        await removeFromGallery(jobId);
+        setIsPublic(false);
+        alert('Job removed from Public Gallery.');
+      } else {
+        await publishToGallery(jobId);
+        setIsPublic(true);
+        alert('Job published to Public Gallery!');
+      }
+    } catch (err: any) {
+      alert(`Failed to update gallery status: ${err.message}`);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleCreateShareLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSharing(true);
+    try {
+      const { createShareLink } = await import('@/lib/api');
+      const result = await createShareLink(jobId, { expires_in_days: shareExpires, allow_download: shareAllowDownload });
+      // Construct full URL using window.location.origin
+      setShareToken(`${window.location.origin}${result.share_url}`);
+    } catch (err: any) {
+      alert(`Failed to create share link: ${err.message}`);
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -74,6 +119,25 @@ export function JobResults({ jobId, score, stats, gaps, advancedOptions }: JobRe
               )}
             </div>
           )}
+          {!readOnly && (
+            <div style={{ marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <button
+                className={isPublic ? styles.btnSecondary : styles.btnPrimary}
+                onClick={handleToggleGallery}
+                disabled={isPublishing}
+                style={{ fontSize: '0.9rem', padding: '6px 12px' }}
+              >
+                {isPublishing ? '...' : isPublic ? 'Remove from Gallery' : 'Publish to Gallery'}
+              </button>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => setShowShareModal(true)}
+                style={{ fontSize: '0.9rem', padding: '6px 12px' }}
+              >
+                Share Link
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.grid}>
@@ -98,25 +162,33 @@ export function JobResults({ jobId, score, stats, gaps, advancedOptions }: JobRe
             <div className={styles.statsGrid}>
               <div className={styles.statItem}>
                 <Code2 size={20} className={styles.statIcon} />
-                <div className={styles.statInfo}>
-                  <span className={styles.statValue}>{stats.files}</span>
-                  <span className={styles.statLabel}>Generated Files</span>
-                </div>
+                <span className={styles.statValue}>{stats.loc.toLocaleString()}</span>
+                <span className={styles.statLabel}>Lines of Code</span>
               </div>
               <div className={styles.statItem}>
-                <div className={styles.statIconPlaceholder}>{"{ }"}</div>
-                <div className={styles.statInfo}>
-                  <span className={styles.statValue}>{stats.loc}</span>
-                  <span className={styles.statLabel}>Lines of Code</span>
-                </div>
+                <FileText size={20} className={styles.statIcon} />
+                <span className={styles.statValue}>{stats.files}</span>
+                <span className={styles.statLabel}>Source Files</span>
               </div>
               <div className={styles.statItem}>
-                <CheckCircle size={20} className={styles.statIconSuccess} />
-                <div className={styles.statInfo}>
-                  <span className={styles.statValue}>{stats.tests}</span>
-                  <span className={styles.statLabel}>Passing Tests</span>
-                </div>
+                <CheckCircle size={20} className={styles.statIcon} style={{ color: 'var(--color-success)' }} />
+                <span className={styles.statValue}>{stats.tests}</span>
+                <span className={styles.statLabel}>Passing Tests</span>
               </div>
+            </div>
+
+            <div className={styles.actionButtons}>
+              {allowDownload && (
+                <button className={styles.btnPrimary} onClick={handleDownload}>
+                  <Download size={18} />
+                  Download Archive
+                </button>
+              )}
+              {!readOnly && (
+                <button className={styles.btnSecondary} onClick={() => setShowGithubModal(true)}>
+                  Push to GitHub
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -188,6 +260,75 @@ export function JobResults({ jobId, score, stats, gaps, advancedOptions }: JobRe
                   {isPushing ? 'Pushing...' : 'Push Repository'}
                 </button>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Job Modal */}
+      <AnimatePresence>
+        {showShareModal && (
+          <div className={styles.modalOverlay}>
+            <motion.div
+              className={styles.modalContent}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+            >
+              <button className={styles.closeBtn} onClick={() => { setShowShareModal(false); setShareToken(null); }}>
+                <X size={20} />
+              </button>
+              <h2>Share Read-Only Link</h2>
+              <p style={{ color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+                Generate a secure link to share this reproduction job.
+              </p>
+
+              {!shareToken ? (
+                <form onSubmit={handleCreateShareLink} className={styles.pushForm}>
+                  <div className={styles.formGroup}>
+                    <label>Expiration</label>
+                    <select
+                      value={shareExpires || ""}
+                      onChange={(e) => setShareExpires(e.target.value ? Number(e.target.value) : null)}
+                      className={styles.input}
+                    >
+                      <option value="1">1 Day</option>
+                      <option value="7">7 Days</option>
+                      <option value="30">30 Days</option>
+                      <option value="">Never Expires</option>
+                    </select>
+                  </div>
+                  <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      id="allowDownload"
+                      checked={shareAllowDownload}
+                      onChange={(e) => setShareAllowDownload(e.target.checked)}
+                      style={{ width: 'auto' }}
+                    />
+                    <label htmlFor="allowDownload" style={{ margin: 0 }}>Allow repository download</label>
+                  </div>
+
+                  <button type="submit" className={styles.btnPrimary} disabled={isSharing}>
+                    {isSharing ? 'Generating...' : 'Generate Link'}
+                  </button>
+                </form>
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ background: 'var(--color-bg-tertiary)', padding: '16px', borderRadius: '8px', marginBottom: '16px', wordBreak: 'break-all' }}>
+                    <code>{shareToken}</code>
+                  </div>
+                  <button
+                    className={styles.btnPrimary}
+                    onClick={() => {
+                      navigator.clipboard.writeText(shareToken);
+                      alert('Copied to clipboard!');
+                    }}
+                  >
+                    Copy to Clipboard
+                  </button>
+                </div>
+              )}
             </motion.div>
           </div>
         )}

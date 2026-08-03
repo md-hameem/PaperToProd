@@ -97,6 +97,10 @@ class Workspace(Base):
     github_installation_id: Mapped[str | None] = mapped_column(String(100))
     github_account_name: Mapped[str | None] = mapped_column(String(100))
 
+    # BYO LLM Integration
+    byo_llm_provider: Mapped[str | None] = mapped_column(String(50))
+    byo_llm_api_key_encrypted: Mapped[str | None] = mapped_column(String(500))
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -195,6 +199,7 @@ class Job(Base):
             "status",
             postgresql_where="status IN ('queued', 'running')",
         ),
+        Index("ix_jobs_public", "is_public", "fidelity_score"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -214,6 +219,8 @@ class Job(Base):
     fidelity_score: Mapped[float | None] = mapped_column()
     error_message: Mapped[str | None] = mapped_column(Text)
     retry_count: Mapped[int] = mapped_column(Integer, default=0)
+    is_public: Mapped[bool] = mapped_column(Boolean, default=False)
+    benchmark_results: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Cost tracking
     compute_cost_cents: Mapped[int] = mapped_column(Integer, default=0)
@@ -232,6 +239,29 @@ class Job(Base):
     )
     events: Mapped[list["JobEvent"]] = relationship(back_populates="job", lazy="selectin")
     artifacts: Mapped[list["JobArtifact"]] = relationship(back_populates="job", lazy="selectin")
+    shares: Mapped[list["JobShare"]] = relationship(
+        back_populates="job", lazy="selectin", cascade="all, delete-orphan"
+    )
+
+
+# ── Job Shares ────────────────────────────────────────────────
+
+
+class JobShare(Base):
+    """Expirable, read-only share links for a job."""
+
+    __tablename__ = "job_shares"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False)
+    token: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    allow_download: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    job: Mapped["Job"] = relationship(back_populates="shares")
 
 
 # ── Job State Checkpoints ─────────────────────────────────────

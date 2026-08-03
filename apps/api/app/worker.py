@@ -16,9 +16,10 @@ from sqlalchemy.future import select
 
 from app.config import settings
 from app.database import async_session_maker
-from app.models import Job, Notification, User, Webhook
+from app.models import Job, Notification, User, Webhook, Workspace
 from app.pipeline.checkpointer import get_checkpointer
 from app.pipeline.graph import graph_builder
+from app.utils.crypto import decrypt_key
 
 # Configure Structlog
 structlog.configure(
@@ -73,9 +74,32 @@ async def _run_pipeline_async(job_id: int, initial_state: dict):
         # Compile graph with persistence and human-in-the-loop interruption
         graph = graph_builder.compile(checkpointer=checkpointer, interrupt_before=["scaffolder"])
 
+        # Fetch job and workspace to get potential BYO key
+        byo_api_key = None
+        byo_provider = None
+
+        async with async_session_maker() as db:
+            stmt = select(Job).where(Job.id == job_id)
+            result = await db.execute(stmt)
+            job = result.scalar_one_or_none()
+            if job:
+                ws_stmt = select(Workspace).where(Workspace.id == job.workspace_id)
+                ws_res = await db.execute(ws_stmt)
+                ws = ws_res.scalar_one_or_none()
+                if ws and ws.byo_llm_api_key_encrypted:
+                    byo_api_key = decrypt_key(ws.byo_llm_api_key_encrypted)
+                    byo_provider = ws.byo_llm_provider
+
         from typing import Any, cast
 
-        config = cast("Any", {"configurable": {"thread_id": str(job_id)}})
+        config_dict = {
+            "configurable": {
+                "thread_id": str(job_id),
+                "byo_api_key": byo_api_key,
+                "byo_provider": byo_provider,
+            }
+        }
+        config = cast("Any", config_dict)
 
         # Run graph
         await graph.ainvoke(initial_state, config)

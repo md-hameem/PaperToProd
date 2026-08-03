@@ -8,7 +8,18 @@ import os
 import re
 import shutil
 
-from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    Header,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+)
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,6 +38,7 @@ from app.jobs.schemas import (
     JobSummaryResponse,
 )
 from app.models import User, WorkspaceMember, WorkspaceRole
+from app.websocket.manager import redis_client
 
 router = APIRouter()
 
@@ -187,15 +199,50 @@ async def cancel_job(
 @router.get("/{job_id}/logs")
 async def get_job_logs(
     job_id: int,
+    request: Request,
     x_workspace_id: int = Header(...),
     membership: WorkspaceMember = Depends(require_workspace_role()),
     db: AsyncSession = Depends(get_db),
 ):
-    """Stream full job execution logs."""
+    """Stream full job execution logs via SSE or return JSON."""
     # Verify job exists
     await service.get_job(db=db, job_id=job_id, workspace_id=x_workspace_id)
 
-    # Mock log retrieval from storage
+    accept_header = request.headers.get("accept", "")
+
+    if "text/event-stream" in accept_header:
+
+        async def event_generator():
+            # 1. Fetch historical events
+            events = await service.get_job_events(
+                db=db,
+                job_id=job_id,
+                workspace_id=x_workspace_id,
+                since_sequence=0,
+            )
+            for event in events:
+                # Convert ORM model to dictionary then JSON string
+                payload = JobEventResponse.model_validate(event).model_dump_json()
+                yield f"data: {payload}\n\n"
+
+            # 2. Subscribe to Redis for live events
+            channel_name = f"job_events:{job_id}"
+            pubsub = redis_client.pubsub()
+            await pubsub.subscribe(channel_name)
+
+            try:
+                async for message in pubsub.listen():
+                    if message["type"] == "message":
+                        yield f"data: {message['data']}\n\n"
+            except asyncio.CancelledError:
+                pass
+            finally:
+                await pubsub.unsubscribe(channel_name)
+                await pubsub.close()
+
+        return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+    # Mock log retrieval from storage for standard JSON request
     log_path = f"storage/jobs/{job_id}/logs/full.log"
     if os.path.exists(log_path):
         with open(log_path) as f:

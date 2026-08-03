@@ -6,11 +6,13 @@ Modules: auth, jobs, billing, integrations, gallery, notifications, websocket.
 """
 
 import contextlib
+import hashlib
 import os
 import uuid
 
+import jwt
 import structlog
-from fastapi import FastAPI, Request, APIRouter
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -74,13 +76,42 @@ def create_app() -> FastAPI:
         structlog.contextvars.clear_contextvars()
         structlog.contextvars.bind_contextvars(request_id=request_id)
 
+        # Extract Actor for Audit Logging
+        actor_id = "anonymous"
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            if token.startswith("ptp_"):
+                actor_id = f"apikey:{hashlib.sha256(token.encode()).hexdigest()[:8]}"
+            else:
+                try:
+                    # Non-verifying decode just for audit trail attribution
+                    payload = jwt.decode(token, options={"verify_signature": False})
+                    actor_id = f"user:{payload.get('sub', 'unknown')}"
+                except Exception:
+                    actor_id = "invalid_token"
+
+        structlog.contextvars.bind_contextvars(actor_id=actor_id)
+
         # Inject request_id into OpenTelemetry current span
         current_span = trace.get_current_span()
         if current_span.is_recording():
             current_span.set_attribute("request_id", request_id)
+            current_span.set_attribute("actor_id", actor_id)
 
         response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
+
+        # Emit [AUDIT] log for mutative requests
+        if request.method in ["POST", "PUT", "PATCH", "DELETE"]:
+            logger = structlog.get_logger("audit")
+            logger.info(
+                "audit_event",
+                method=request.method,
+                url=str(request.url),
+                status_code=response.status_code,
+            )
+
         return response
 
     # Instrument FastAPI with OpenTelemetry
@@ -106,8 +137,10 @@ def _register_routers(app: FastAPI) -> None:
     from app.auth.api_keys import router as api_keys_router
     from app.auth.router import router as auth_router
     from app.billing.router import router as billing_router
+    from app.gallery.router import router as gallery_router
     from app.integrations.router import router as integrations_router
     from app.jobs.router import router as jobs_router
+    from app.jobs.shared_router import router as shared_router
     from app.notifications.router import router as notifications_router
     from app.users.router import router as users_router
     from app.webhooks.router import router as webhooks_router
@@ -125,6 +158,10 @@ def _register_routers(app: FastAPI) -> None:
     api_v1.include_router(users_router, tags=["Users"])
     api_v1.include_router(notifications_router, tags=["Notifications"])
     api_v1.include_router(webhooks_router, tags=["Webhooks"])
+    api_v1.include_router(gallery_router, tags=["Gallery"])
+
+    # We include shared_router on the main app directly since its prefix is already in the router
+    app.include_router(shared_router)
 
     app.include_router(api_v1)
     app.include_router(websocket_router, tags=["WebSockets"])

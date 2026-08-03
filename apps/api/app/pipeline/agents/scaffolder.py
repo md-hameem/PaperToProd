@@ -5,6 +5,7 @@ AI Pipeline — Scaffolder Agent (Doc 08 §3.3).
 import asyncio
 
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, Field
 
 from app.pipeline.llm import get_llm
@@ -81,7 +82,7 @@ async def _generate_file(
     return filepath, code.strip()
 
 
-async def run_scaffolder(state: JobState) -> dict:
+async def run_scaffolder(state: JobState, config: RunnableConfig) -> dict:
     """LangGraph node for the Scaffolder Agent."""
     job_id = state["job_id"]
     await publish_job_event(
@@ -93,7 +94,10 @@ async def run_scaffolder(state: JobState) -> dict:
         [f"- {c['id']}: {c['description']}" for c in methodology.get("components", [])]
     )
 
-    llm = get_llm(temperature=0.1)
+    byo_api_key = config.get("configurable", {}).get("byo_api_key")
+    byo_provider = config.get("configurable", {}).get("byo_provider")
+
+    llm = get_llm(temperature=0.1, byo_api_key=byo_api_key, byo_provider=byo_provider)
 
     prompt = ChatPromptTemplate.from_messages(
         [("system", SCAFFOLD_PROMPT_SYSTEM), ("user", SCAFFOLD_PROMPT_USER)]
@@ -117,7 +121,7 @@ async def run_scaffolder(state: JobState) -> dict:
 
     tasks = []
     # Use standard model for file gen
-    file_gen_llm = get_llm(temperature=0.2)
+    file_gen_llm = get_llm(temperature=0.2, byo_api_key=byo_api_key, byo_provider=byo_provider)
 
     for filepath, purpose in file_tree.items():
         tasks.append(_generate_file(file_gen_llm, filepath, purpose, methodology_str))

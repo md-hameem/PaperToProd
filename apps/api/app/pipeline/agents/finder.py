@@ -4,13 +4,15 @@ AI Pipeline — Finder Agent (Doc 08 §3.2).
 
 from github import Github
 from github.GithubException import RateLimitExceededException
+from langchain_core.runnables import RunnableConfig
 
 from app.config import settings
+from app.pipeline.llm import get_llm
 from app.pipeline.state import JobState
 from app.websocket.manager import publish_job_event
 
 
-async def run_finder(state: JobState) -> dict:
+async def run_finder(state: JobState, config: RunnableConfig) -> dict:
     """LangGraph node for the Finder Agent."""
     job_id = state["job_id"]
     await publish_job_event(
@@ -19,6 +21,12 @@ async def run_finder(state: JobState) -> dict:
 
     paper = state.get("paper", {})
     title = paper.get("title") or paper.get("arxiv_id", "")
+
+    byo_api_key = config.get("configurable", {}).get("byo_api_key")
+    byo_provider = config.get("configurable", {}).get("byo_provider")
+
+    # Use LLM to score relevance
+    llm = get_llm(temperature=0.0, byo_api_key=byo_api_key, byo_provider=byo_provider)
 
     candidate_repos = []
     chosen_strategy = "generate_fresh"

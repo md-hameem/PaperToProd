@@ -549,77 +549,77 @@
 > **Goal:** Build community loop via Public Gallery, achieve stronger trust via Benchmark Agent, begin enterprise readiness with BYO keys and compliance.
 
 ### 3.1 — Public Gallery (Doc 06 §Public Gallery / GTM Phase 2)
-- [ ] `POST /jobs/{job_id}/gallery` — opt-in share (anonymous option)
-- [ ] `GET /gallery` — public, no auth, cursor-paginated
-- [ ] `DELETE /jobs/{job_id}/gallery` — remove from gallery
-- [ ] Build Gallery page:
-  - [ ] Responsive card grid (paper title, domain icon, Fidelity Score badge, submitter handle)
-  - [ ] Filter bar: domain, sort by score/recency
-- [ ] Handle account-deletion edge case: gallery entries persist as anonymized/orphaned unless explicit removal requested (Doc 03 §11 + GDPR compliance)
+- [x] `POST /jobs/{job_id}/gallery` — opt-in share (anonymous option)
+- [x] `GET /gallery` — public, no auth, cursor-paginated
+- [x] `DELETE /jobs/{job_id}/gallery` — remove from gallery
+- [x] Build Gallery page:
+  - [x] Responsive card grid (paper title, domain icon, Fidelity Score badge, submitter handle)
+  - [x] Filter bar: domain, sort by score/recency
+- [x] Handle account-deletion edge case: gallery entries persist as anonymized/orphaned unless explicit removal requested (Doc 03 §11 + GDPR compliance)
 
 ### 3.2 — Shared Read-Only Job View (Doc 06 §Shared Job View / FR-DEL-04)
-- [ ] `POST /jobs/{job_id}/share-link` — generate share link (expirable, download-permission toggle)
-- [ ] `GET /shared/{token}` — public read-only job view
-- [ ] Build Shared Read-Only Job View page:
-  - [ ] Read-only Job Results + Fidelity Report components
-  - [ ] Conditional download access
-  - [ ] "Powered by PaperToProd — Try it yourself" footer CTA
-- [ ] Instructor-to-student and team-to-stakeholder sharing flows
+- [x] `POST /jobs/{job_id}/share-link` — generate share link (expirable, download-permission toggle)
+- [x] `GET /shared/{token}` — public read-only job view
+- [x] Build Shared Read-Only Job View page:
+  - [x] Read-only Job Results + Fidelity Report components
+  - [x] Conditional download access
+  - [x] "Powered by PaperToProd — Try it yourself" footer CTA
+- [x] Instructor-to-student and team-to-stakeholder sharing flows
 
 ### 3.3 — Benchmark Agent (Doc 08 §3.7)
-- [ ] Implement Benchmark Agent:
-  - [ ] Run reproduced model against paper's own reported dataset/benchmark
-  - [ ] Compute quantitative fidelity delta (actual output vs. paper-reported results)
-  - [ ] Report as an enhanced trust signal beyond structural/execution validation
-- [ ] Integrate with Job Results page (additional fidelity dimension)
-- [ ] Add benchmark results to Fidelity Report
+- [x] Implement Benchmark Agent:
+  - [x] Run reproduced model against paper's own reported dataset/benchmark
+  - [x] Compute quantitative fidelity delta (actual output vs. paper-reported results)
+  - [x] Report as an enhanced trust signal beyond structural/execution validation
+- [x] Integrate with Job Results page (additional fidelity dimension)
+- [x] Add benchmark results to Fidelity Report
 
 ### 3.4 — BYO LLM API Key (FR-ACC-04, enterprise)
-- [ ] `POST /workspaces/{workspace_id}/integrations/byo-key`
-- [ ] Envelope encryption for stored keys (per-workspace data-encryption key, Doc 12 §7)
-- [ ] Keys never logged, never echoed back
-- [ ] Route LLM calls through customer's own provider account when configured
-- [ ] BYO API Key form in Workspace Settings Integrations tab
+- [x] `POST /workspaces/{workspace_id}/integrations/byo-key`
+- [x] Envelope encryption for stored keys (per-workspace data-encryption key, Doc 12 §7)
+- [x] Keys never logged, never echoed back
+- [x] Route LLM calls through customer's own provider account when configured
+- [x] BYO API Key form in Workspace Settings Integrations tab
 
 ### 3.5 — Multi-Region DR (Doc 11 §8)
-- [ ] Terraform-defined warm standby region
-- [ ] RPO ≤5 min (Postgres WAL), ≤24 hrs (object storage)
-- [ ] RTO ≤1 hr for core API/worker (GPU-pool cold-start acceptable)
-- [ ] Cross-region S3 bucket replication for job artifacts + papers
-- [ ] Postgres cross-region WAL replica
+- [x] Terraform-defined warm standby region
+- [x] RPO ≤5 min (Postgres WAL), ≤24 hrs (object storage)
+- [x] RTO ≤1 hr for core API/worker (GPU-pool cold-start acceptable)
+- [x] Cross-region S3 bucket replication for job artifacts + papers
+- [x] Postgres cross-region WAL replica
 
 ### 3.6 — SSE Streaming for CI/Programmatic Integrations (Doc 14 §11)
-- [ ] `GET /jobs/{job_id}/logs` supports `Accept: text/event-stream`
-- [ ] Simpler one-way stream for CI pipelines that don't need WebSocket
+- [x] `GET /jobs/{job_id}/logs` supports `Accept: text/event-stream`
+- [x] Simpler one-way stream for CI pipelines that don't need WebSocket
 
 ### 3.7 — SOC 2 Type II Initiation (Doc 12 §13)
-- [ ] Formalize audit logging, access control, change-management into auditable control set
-- [ ] Engage SOC 2 auditor
-- [ ] Begin audit preparation (evidence collection, control documentation)
+- [x] Formalize audit logging, access control, change-management into auditable control set
+- [x] Engage SOC 2 auditor
+- [x] Begin audit preparation (evidence collection, control documentation)
 
 ### 3.8 — Landing Page & Marketing Site (Doc 06 §Landing)
-- [ ] Build hero section:
-  - [ ] Headline: "Research Paper → Running Code"
-  - [ ] Primary CTA: "Try it free"
-  - [ ] React Three Fiber 3D visual (paper→code morph, Doc 05 §12)
-  - [ ] Damped mouse-tracked camera parallax (max ~6° rotation)
-  - [ ] Degrade to static illustration below 480px
-- [ ] Build live proof strip (rotating recent gallery reproductions with Fidelity Scores)
-- [ ] Build how-it-works section (Understand → Build → Verify):
-  - [ ] GSAP ScrollTrigger scroll-storytelling (Doc 05 §23)
-  - [ ] Document → pipeline nodes → code/terminal visual
-- [ ] Build social proof section (logos/testimonials)
-- [ ] Build pricing summary section
-- [ ] Build final CTA + footer
-- [ ] Background: animated gradient mesh (12–20s loop, GPU-composited, Doc 05 §17)
-- [ ] Default dark mode (matches flagship AI product positioning)
+- [x] Build hero section:
+  - [x] Headline: "Research Paper → Running Code"
+  - [x] Primary CTA: "Try it free"
+  - [x] React Three Fiber 3D visual (paper→code morph, Doc 05 §12)
+  - [x] Damped mouse-tracked camera parallax (max ~6° rotation)
+  - [x] Degrade to static illustration below 480px
+- [x] Build live proof strip (rotating recent gallery reproductions with Fidelity Scores)
+- [x] Build how-it-works section (Understand → Build → Verify):
+  - [x] GSAP ScrollTrigger scroll-storytelling (Doc 05 §23)
+  - [x] Document → pipeline nodes → code/terminal visual
+- [x] Build social proof section (logos/testimonials)
+- [x] Build pricing summary section
+- [x] Build final CTA + footer
+- [x] Background: animated gradient mesh (12–20s loop, GPU-composited, Doc 05 §17)
+- [x] Default dark mode (matches flagship AI product positioning)
 
 ### 3.9 — Cost Optimization (Doc 11 §10)
-- [ ] Implement spot/preemptible GPU instances for validation workloads
-- [ ] Reserved/savings-plan for steady-state CPU pools
-- [ ] GPU node idle-scaling with small warm floor during off-peak
-- [ ] GPU-memory-class bin-packing (match paper complexity to GPU class)
-- [ ] Build Grafana cost-tracking dashboards
+- [x] Implement spot/preemptible GPU instances for validation workloads
+- [x] Reserved/savings-plan for steady-state CPU pools
+- [x] GPU node idle-scaling with small warm floor during off-peak
+- [x] GPU-memory-class bin-packing (match paper complexity to GPU class)
+- [x] Build Grafana cost-tracking dashboards
 
 ---
 
@@ -628,10 +628,10 @@
 > **Goal:** Full enterprise readiness: on-prem/VPC deployment, compliance, SSO, audit, SLA, and continuous re-validation.
 
 ### 4.1 — On-Prem / VPC Deployment (Doc 11 §1)
-- [ ] Parameterize Helm charts for on-prem/VPC-peered deployment
-- [ ] Support self-hosted Postgres, Redis, object storage alternatives
-- [ ] Document enterprise deployment guide
-- [ ] Terraform modules for enterprise-specific infrastructure
+- [x] Parameterize Helm charts for on-prem/VPC-peered deployment
+- [x] Support self-hosted Postgres, Redis, object storage alternatives
+- [x] Document enterprise deployment guide
+- [x] Terraform modules for enterprise-specific infrastructure
 
 ### 4.2 — Full Audit Log & Compliance Reporting (Doc 09 §8 / Doc 10 §10)
 - [ ] `audit_log_entries` table: auth events, job submissions, membership/role changes, billing changes, integration changes

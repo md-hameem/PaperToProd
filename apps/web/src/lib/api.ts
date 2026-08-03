@@ -188,6 +188,20 @@ export async function changeWorkspaceRole(workspaceId: string, targetUserId: str
   return response.json();
 }
 
+/**
+ * Removes a member.
+ */
+export async function removeWorkspaceMember(workspaceId: string, targetUserId: string) {
+  const response = await apiFetch(`/workspaces/${workspaceId}/members/${targetUserId}`, {
+    method: 'DELETE'
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to remove member');
+  }
+  return true;
+}
+
 // Workspace Billing API
 
 export async function getWorkspaceUsage(workspaceId: string) {
@@ -199,6 +213,46 @@ export async function createCheckoutSession(workspaceId: string) {
     method: 'POST',
   });
 }
+
+export async function createPortalSession(workspaceId: string) {
+  return apiFetch(`/workspaces/${workspaceId}/billing/portal-session`, {
+    method: 'POST',
+  });
+}
+
+// Workspace Integrations API
+
+export async function getWorkspaceIntegrations(workspaceId: string) {
+  const response = await apiFetch(`/workspaces/${workspaceId}/integrations/github`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch integrations');
+  }
+  return response.json();
+}
+
+export async function addBYOKey(workspaceId: string, provider: string, apiKey: string) {
+  const response = await apiFetch(`/workspaces/${workspaceId}/integrations/byo-key`, {
+    method: 'POST',
+    body: JSON.stringify({ provider, api_key: apiKey }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to add BYO key');
+  }
+  return response.json();
+}
+
+export async function removeBYOKey(workspaceId: string) {
+  const response = await apiFetch(`/workspaces/${workspaceId}/integrations/byo-key`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to remove BYO key');
+  }
+  return response.json();
+}
+
 
 // GitHub Integrations
 
@@ -254,35 +308,42 @@ export async function updateProfile(data: { display_name?: string, email?: strin
   });
 }
 
+/**
+ * Lists API keys for the authenticated user.
+ */
 export async function getApiKeys() {
-  return apiFetch('/users/me/api-keys');
-}
-
-export async function createApiKey(name: string) {
-  return apiFetch('/users/me/api-keys', {
-    method: 'POST',
-    body: JSON.stringify({ name }),
-  });
-}
-
-export async function revokeApiKey(id: number) {
-  return apiFetch(`/users/me/api-keys/${id}`, {
-    method: 'DELETE',
-  });
+  const response = await apiFetch('/auth/api-keys');
+  if (!response.ok) {
+    throw new Error('Failed to list API keys');
+  }
+  return response.json();
 }
 
 /**
- * Removes a member.
+ * Creates a new API key.
  */
-export async function removeWorkspaceMember(workspaceId: string, targetUserId: string) {
-  const response = await apiFetch(`/workspaces/${workspaceId}/members/${targetUserId}`, {
-    method: 'DELETE'
+export async function createApiKey(name: string) {
+  const response = await apiFetch('/auth/api-keys', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
   });
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Failed to remove member');
+    throw new Error('Failed to create API key');
   }
-  return true;
+  return response.json();
+}
+
+/**
+ * Revokes an API key.
+ */
+export async function revokeApiKey(keyId: number) {
+  const response = await apiFetch(`/auth/api-keys/${keyId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to revoke API key');
+  }
+  return response.json();
 }
 
 // ── Notifications ───────────────────────────────────────────
@@ -329,39 +390,75 @@ export async function deleteWebhook(workspaceId: string, webhookId: number) {
 }
 
 /**
- * Lists API keys for the authenticated user.
+ * Lists public gallery jobs.
  */
-export async function getApiKeys() {
-  const response = await apiFetch('/auth/api-keys');
+export async function getGalleryJobs(domain?: string, sort: string = 'score') {
+  let url = `/gallery?sort=${sort}`;
+  if (domain && domain !== 'ALL') {
+    url += `&domain=${domain}`;
+  }
+
+  // Note: we fetch normally but this endpoint doesn't require auth
+  const response = await fetch(`${API_BASE_URL}${url}`);
   if (!response.ok) {
-    throw new Error('Failed to list API keys');
+    throw new Error('Failed to fetch gallery jobs');
   }
   return response.json();
 }
 
 /**
- * Creates a new API key.
+ * Publishes a job to the public gallery.
  */
-export async function createApiKey(name: string) {
-  const response = await apiFetch('/auth/api-keys', {
+export async function publishToGallery(jobId: string) {
+  const response = await apiFetch(`/gallery/${jobId}`, {
     method: 'POST',
-    body: JSON.stringify({ name }),
   });
   if (!response.ok) {
-    throw new Error('Failed to create API key');
+    throw new Error('Failed to publish job to gallery');
   }
   return response.json();
 }
 
 /**
- * Revokes an API key.
+ * Removes a job from the public gallery.
  */
-export async function revokeApiKey(keyId: number) {
-  const response = await apiFetch(`/auth/api-keys/${keyId}`, {
+export async function removeFromGallery(jobId: string) {
+  const response = await apiFetch(`/gallery/${jobId}`, {
     method: 'DELETE',
   });
   if (!response.ok) {
-    throw new Error('Failed to revoke API key');
+    throw new Error('Failed to remove job from gallery');
+  }
+  return response.json();
+}
+
+/**
+ * Creates an expirable share link for a job.
+ */
+export async function createShareLink(jobId: string, options: { expires_in_days?: number | null, allow_download: boolean }) {
+  const response = await apiFetch(`/jobs/${jobId}/share-link`, {
+    method: 'POST',
+    body: JSON.stringify(options)
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create share link');
+  }
+  return response.json();
+}
+
+/**
+ * Retrieves a shared job by token (No auth required).
+ */
+export async function getSharedJob(token: string) {
+  const response = await fetch(`${API_BASE_URL}/shared/${token}`);
+  if (!response.ok) {
+    if (response.status === 410) {
+      throw new Error('This share link has expired.');
+    }
+    if (response.status === 404) {
+      throw new Error('Share link not found or invalid.');
+    }
+    throw new Error('Failed to load shared job.');
   }
   return response.json();
 }

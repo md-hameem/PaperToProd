@@ -4,6 +4,7 @@ AI Pipeline — LangGraph Orchestration (Doc 08 §4).
 
 from langgraph.graph import END, START, StateGraph
 
+from app.pipeline.agents.benchmark import run_benchmark
 from app.pipeline.agents.devops import run_devops
 from app.pipeline.agents.docgen import run_docgen
 from app.pipeline.agents.extractor import run_extractor
@@ -24,6 +25,7 @@ def create_pipeline_graph() -> StateGraph:
     workflow.add_node("scaffolder", run_scaffolder)
     workflow.add_node("devops", run_devops)
     workflow.add_node("reviewer", run_reviewer)
+    workflow.add_node("benchmark", run_benchmark)
     workflow.add_node("docgen", run_docgen)
 
     # Add edges
@@ -44,8 +46,11 @@ def create_pipeline_graph() -> StateGraph:
     workflow.add_conditional_edges(
         "reviewer",
         route_repair,
-        {"scaffolder": "scaffolder", "devops": "devops", "docgen": "docgen"},
+        {"scaffolder": "scaffolder", "devops": "devops", "benchmark": "benchmark"},
     )
+
+    # Benchmark -> DocGen
+    workflow.add_edge("benchmark", "docgen")
 
     # DocGen -> END
     workflow.add_edge("docgen", END)

@@ -113,3 +113,6 @@ class JobState(TypedDict, total=False):
 
     # Audit trail
     audit_log: Annotated[list[dict[str, Any]], extend_list]
+
+    # Benchmark metrics
+    benchmark_results: dict | None

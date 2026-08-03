@@ -15,6 +15,7 @@ module "eks" {
       max_size     = 10
       desired_size = 2
       instance_types = ["t3.medium"]
+      capacity_type  = "ON_DEMAND"
       labels = {
         role = "api"
       }
@@ -24,17 +25,57 @@ module "eks" {
       max_size     = 10
       desired_size = 2
       instance_types = ["t3.large"]
+      capacity_type  = "ON_DEMAND"
       labels = {
         role = "worker"
       }
     }
-    gpu_pool = {
+    gpu_pool_t4 = {
       min_size     = 0
       max_size     = 5
       desired_size = 0
       instance_types = ["g4dn.xlarge"]
+      capacity_type  = "SPOT"
       labels = {
         role = "gpu-worker"
+        gpu_class = "t4"
+      }
+      taints = [
+        {
+          key    = "nvidia.com/gpu"
+          value  = "true"
+          effect = "NO_SCHEDULE"
+        }
+      ]
+    }
+    gpu_pool_a10g = {
+      min_size     = 0
+      max_size     = 3
+      desired_size = 0
+      instance_types = ["g5.2xlarge"]
+      capacity_type  = "SPOT"
+      labels = {
+        role = "gpu-worker"
+        gpu_class = "a10g"
+      }
+      taints = [
+        {
+          key    = "nvidia.com/gpu"
+          value  = "true"
+          effect = "NO_SCHEDULE"
+        }
+      ]
+    }
+    gpu_pool_warm = {
+      min_size     = 1
+      max_size     = 1
+      desired_size = 1
+      instance_types = ["g4dn.xlarge"]
+      capacity_type  = "ON_DEMAND"
+      labels = {
+        role = "gpu-worker"
+        gpu_class = "t4"
+        lifecycle = "warm"
       }
       taints = [
         {

@@ -28,5 +28,21 @@ spec:
         env:
         - name: DEPLOYMENT_VERSION
           value: "{{ .Values.image.tag }}"
+        {{- if .Values.externalDatabase }}
+        - name: DATABASE_URL
+          value: "{{ .Values.externalDatabase.url }}"
+        {{- end }}
+        {{- if .Values.externalRedis }}
+        - name: REDIS_URL
+          value: "{{ .Values.externalRedis.url }}"
+        {{- end }}
+        {{- if .Values.externalS3 }}
+        - name: S3_ENDPOINT_URL
+          value: "{{ .Values.externalS3.endpoint }}"
+        - name: AWS_ACCESS_KEY_ID
+          value: "{{ .Values.externalS3.accessKey }}"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "{{ .Values.externalS3.secretKey }}"
+        {{- end }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}

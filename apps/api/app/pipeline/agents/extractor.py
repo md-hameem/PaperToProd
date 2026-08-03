@@ -3,6 +3,7 @@ AI Pipeline — Extractor Agent (Doc 08 §3.1).
 """
 
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableConfig
 
 from app.pipeline.llm import get_llm
 from app.pipeline.state import JobState
@@ -35,7 +36,7 @@ Return a structured JSON with 'components' (pieces of the methodology) and 'gaps
 }
 
 
-async def run_extractor(state: JobState) -> dict:
+async def run_extractor(state: JobState, config: RunnableConfig) -> dict:
     """LangGraph node for the Extractor Agent."""
     job_id = state.get("job_id", 0)
     await publish_job_event(
@@ -64,7 +65,9 @@ async def run_extractor(state: JobState) -> dict:
     else:
         raw_text = "No valid paper source provided."
 
-    llm = get_llm(temperature=0.1)
+    byo_api_key = config.get("configurable", {}).get("byo_api_key")
+    byo_provider = config.get("configurable", {}).get("byo_provider")
+    llm = get_llm(temperature=0.1, byo_api_key=byo_api_key, byo_provider=byo_provider)
 
     # 1. Classify Domain
     classifier_chain = (

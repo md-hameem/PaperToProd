@@ -1,0 +1,31 @@
+# Kubecost Values for PaperToProd EKS Cluster
+kubecostProductConfigs:
+  clusterName: papertoprod-eks
+  currencyCode: USD
+
+# Spot data feed for accurate Spot pricing
+spotDatafeed:
+  enabled: true
+
+prometheus:
+  server:
+    global:
+      scrape_interval: 1m
+  nodeExporter:
+    enabled: true
+
+# Enable Grafana dashboards
+grafana:
+  enabled: true
+  sidecar:
+    dashboards:
+      enabled: true
+
+networkCosts:
+  enabled: true
+  config:
+    services:
+      amazon-web-services: true
+
+serviceMonitor:
+  enabled: true

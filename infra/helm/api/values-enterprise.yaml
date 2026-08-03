@@ -1,0 +1,34 @@
+# Enterprise overrides for PaperToProd API Helm Chart
+# Use this configuration for VPC / On-Prem deployments where stateful
+# components (PostgreSQL, Redis, MinIO) are self-hosted and externally managed.
+
+replicaCount: 3
+
+image:
+  repository: my-corporate-registry.com/papertoprod-api
+  tag: enterprise-v1.0.0
+
+# Enterprise customers typically manage their own DB, Redis, and Object Storage
+externalDatabase:
+  url: "postgresql://user:password@corporate-db-cluster.internal:5432/papertoprod"
+
+externalRedis:
+  url: "redis://:password@corporate-redis-cluster.internal:6379/0"
+
+externalS3:
+  # Example points to an on-prem MinIO cluster or equivalent S3-compatible API
+  endpoint: "https://minio.corporate.internal:9000"
+  accessKey: "enterprise-access-key"
+  secretKey: "enterprise-secret-key"
+
+resources:
+  limits:
+    cpu: "4"
+    memory: "4Gi"
+  requests:
+    cpu: "2"
+    memory: "2Gi"
+
+env:
+  LOG_LEVEL: "INFO"
+  ENTERPRISE_MODE: "true"

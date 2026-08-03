@@ -24,6 +24,20 @@ interface Assumption {
   rationale: string;
 }
 
+interface BenchmarkMetric {
+  metric_name: string;
+  paper_baseline: number;
+  reproduced_value: number;
+  delta: number;
+  status: 'pass' | 'warning' | 'fail';
+}
+
+interface BenchmarkResult {
+  dataset_name: string;
+  metrics: BenchmarkMetric[];
+  summary: string;
+}
+
 interface FidelityReport {
   coverage: CoverageItem[];
   structural_checks: StructuralCheck[];
@@ -36,6 +50,7 @@ export default function FidelityReportPage({ params }: { params: Promise<{ id: s
   const router = useRouter();
   const { id } = use(params);
   const [report, setReport] = useState<FidelityReport | null>(null);
+  const [benchmarkResults, setBenchmarkResults] = useState<BenchmarkResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -47,6 +62,12 @@ export default function FidelityReportPage({ params }: { params: Promise<{ id: s
           setReport(doc.fidelity_report);
         } else {
           setError('Fidelity report not found for this job.');
+        }
+
+        if (data.benchmark_results) {
+          setBenchmarkResults(data.benchmark_results);
+        } else if (data.state?.benchmark_results) {
+          setBenchmarkResults(data.state.benchmark_results);
         }
       })
       .catch(err => {
@@ -134,6 +155,41 @@ export default function FidelityReportPage({ params }: { params: Promise<{ id: s
           </tbody>
         </table>
       </section>
+
+      {/* Benchmark Results */}
+      {benchmarkResults && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Quantitative Benchmarks</h2>
+          <div className={styles.card}>
+            <h3 className={styles.cardTitle}>Dataset: {benchmarkResults.dataset_name}</h3>
+            <p className={styles.cardDesc} style={{ marginBottom: '16px' }}>{benchmarkResults.summary}</p>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th className={styles.th}>Metric</th>
+                  <th className={styles.th}>Paper Baseline</th>
+                  <th className={styles.th}>Reproduced</th>
+                  <th className={styles.th}>Delta</th>
+                  <th className={styles.th}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {benchmarkResults.metrics.map((m, idx) => (
+                  <tr key={idx}>
+                    <td className={styles.td}><strong>{m.metric_name}</strong></td>
+                    <td className={styles.td}>{m.paper_baseline}</td>
+                    <td className={styles.td}>{m.reproduced_value}</td>
+                    <td className={styles.td}>{m.delta > 0 ? `+${m.delta.toFixed(2)}` : m.delta.toFixed(2)}</td>
+                    <td className={styles.td}>
+                      <span className={getBadgeClass(m.status)}>{m.status.toUpperCase()}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {/* Structural Checks */}
       <section className={styles.section}>

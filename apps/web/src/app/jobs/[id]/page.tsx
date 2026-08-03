@@ -24,9 +24,10 @@ const INITIAL_AGENTS: AgentState[] = [
   { name: 'extractor', label: 'Extractor Agent', status: 'pending', logs: [] },
   { name: 'finder', label: 'Finder Agent', status: 'pending', logs: [] },
   { name: 'scaffolder', label: 'Scaffolder Agent', status: 'pending', logs: [] },
-  { name: 'devops', label: 'DevOps Agent', status: 'pending', logs: [] },
-  { name: 'reviewer', label: 'Reviewer Agent', status: 'pending', logs: [] },
-  { name: 'docgen', label: 'DocGen Agent', status: 'pending', logs: [] },
+  { name: 'devops', label: 'DevOps', status: 'pending', logs: [] },
+  { name: 'reviewer', label: 'Reviewer', status: 'pending', logs: [] },
+  { name: 'benchmark', label: 'Benchmark', status: 'pending', logs: [] },
+  { name: 'docgen', label: 'Documentation', status: 'pending', logs: [] },
 ];
 
 import { JobResults } from '@/components/JobResults';
@@ -144,6 +145,7 @@ export default function JobProgressPage({ params }: { params: Promise<{ id: stri
                 stats={{ loc: 1204, files: 15, tests: 24 }} // Mock stats
                 gaps={['GPU memory constraint assumed 16GB', 'Batch size reduced to 8 for stability']} // Mock gaps
                 advancedOptions={(jobData as any)?.advanced_options}
+                isPublic={(jobData as any)?.is_public}
               />
             </motion.div>
           ) : (

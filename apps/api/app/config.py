@@ -2,6 +2,7 @@
 Application configuration loaded from environment variables.
 """
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings
 
 
@@ -48,6 +49,10 @@ class Settings(BaseSettings):
     # Google OAuth
     google_client_id: str = ""
     google_client_secret: str = ""
+    stripe_webhook_secret: SecretStr | None = None
+
+    # Encryption (for BYO API keys)
+    encryption_key: SecretStr = SecretStr("mocked-fernet-key-for-dev-only-change-in-prod")
 
     # LLM Providers
     anthropic_api_key: str = ""

@@ -3,6 +3,7 @@ AI Pipeline — DevOps Agent (Doc 08 §3.4).
 """
 
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableConfig
 
 from app.pipeline.llm import get_llm
 from app.pipeline.state import JobState
@@ -40,7 +41,7 @@ Return a JSON object with 'dockerfile', 'compose_config' and 'gpu_required' (boo
 """
 
 
-async def run_devops(state: JobState) -> dict:
+async def run_devops(state: JobState, config: RunnableConfig) -> dict:
     """LangGraph node for the DevOps Agent."""
     job_id = state.get("job_id", 0)
     await publish_job_event(
@@ -82,7 +83,10 @@ async def run_devops(state: JobState) -> dict:
         elif "tensorflow" in [k.lower() for k in deps_dict]:
             base_image = "nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04"
 
-    llm = get_llm(temperature=0.1)
+    byo_api_key = config.get("configurable", {}).get("byo_api_key")
+    byo_provider = config.get("configurable", {}).get("byo_provider")
+
+    llm = get_llm(temperature=0.1, byo_api_key=byo_api_key, byo_provider=byo_provider)
 
     schema = {
         "title": "ContainerConfig",

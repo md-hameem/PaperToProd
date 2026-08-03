@@ -1,0 +1,121 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+  font-family: var(--font-inter);
+}
+
+.header {
+  padding: var(--space-4) var(--space-8);
+  border-bottom: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.badge {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-2);
+}
+
+.main {
+  flex: 1;
+  padding: var(--space-8);
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.jobTitleContainer {
+  margin-bottom: var(--space-8);
+}
+
+.jobTitle {
+  font-size: var(--type-h2-size);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.jobDomain {
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-md-size);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-6) var(--space-8);
+  border-top: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: var(--color-text-secondary);
+}
+
+.errorBox {
+  margin: auto;
+  text-align: center;
+  background: var(--color-bg-secondary);
+  padding: var(--space-12);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-primary);
+  max-width: 400px;
+}
+
+.errorBox h2 {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.errorBox p {
+  margin-bottom: var(--space-6);
+  color: var(--color-text-secondary);
+}
+
+.btnPrimary {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnPrimary:hover {
+  background: var(--color-accent-hover);
+}
+
+.btnSecondary {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-primary);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background: var(--color-bg-tertiary);
+}

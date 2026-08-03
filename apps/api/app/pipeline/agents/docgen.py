@@ -5,6 +5,7 @@ AI Pipeline — Documentation Generator Agent (Doc 08 §3.6).
 import json
 
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableConfig
 
 from app.pipeline.llm import get_llm
 from app.pipeline.state import JobState
@@ -27,7 +28,7 @@ For the fidelity report, provide structured JSON matching the requested schema e
 """
 
 
-async def run_docgen(state: JobState) -> dict:
+async def run_docgen(state: JobState, config: RunnableConfig) -> dict:
     """LangGraph node for the DocGen Agent."""
     job_id = state.get("job_id", 0)
     await publish_job_event(
@@ -43,8 +44,11 @@ async def run_docgen(state: JobState) -> dict:
     files_str = "\n".join(generated_files.keys())
     val_status_str = json.dumps(validation.get("per_component_status", []), indent=2)
     fidelity_score = validation.get("fidelity_score", "N/A")
+    byo_api_key = config.get("configurable", {}).get("byo_api_key")
+    byo_provider = config.get("configurable", {}).get("byo_provider")
 
-    llm = get_llm(temperature=0.2)
+    # Generate README
+    llm = get_llm(temperature=0.2, byo_api_key=byo_api_key, byo_provider=byo_provider)
 
     schema = {
         "title": "Documentation",
